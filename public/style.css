@@ -1,0 +1,200 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.section {
+    display: none;
+}
+
+.section.active {
+    display: block;
+}
+
+#auth-section {
+    max-width: 400px;
+    margin: 100px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+#auth-form input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+#auth-form button {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#auth-form button:hover {
+    background-color: #45a049;
+}
+
+header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#logout-btn {
+    padding: 5px 10px;
+    background-color: white;
+    color: #4CAF50;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#main-content {
+    display: flex;
+    height: calc(100vh - 60px);
+}
+
+#friends-section {
+    width: 300px;
+    background-color: white;
+    padding: 15px;
+    border-right: 1px solid #ddd;
+    overflow-y: auto;
+}
+
+#friend-actions {
+    margin-bottom: 15px;
+}
+
+#friend-username {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+#add-friend-btn {
+    width: 100%;
+    padding: 8px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.friend-item, .request-item {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.friend-item:hover {
+    background-color: #f9f9f9;
+}
+
+.chat-btn, .accept-btn, .reject-btn, .remove-btn {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.chat-btn {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.accept-btn {
+    background-color: #4CAF50;
+    color: white;
+    margin-right: 5px;
+}
+
+.reject-btn, .remove-btn {
+    background-color: #f44336;
+    color: white;
+}
+
+#chat-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+#chat-header {
+    padding: 15px;
+    background-color: white;
+    border-bottom: 1px solid #ddd;
+}
+
+#messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background-color: #f9f9f9;
+}
+
+.message {
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    border-radius: 18px;
+    max-width: 70%;
+}
+
+.message.sent {
+    background-color: #DCF8C6;
+    margin-left: auto;
+    text-align: right;
+}
+
+.message.received {
+    background-color: white;
+}
+
+#message-input {
+    padding: 15px;
+    background-color: white;
+    border-top: 1px solid #ddd;
+    display: flex;
+}
+
+#message {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    margin-right: 10px;
+}
+
+#send-btn {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+}
