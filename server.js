@@ -11,7 +11,7 @@ const io = socketIo(server);
 
 const mongoose = require('mongoose');
 
-const MONGODB_URI = mongodb+srv://chatuser:chat123@sc.xoed8vb.mongodb.net/?retryWrites=true&w=majority&appName=sc;
+const MONGODB_URI = 'mongodb+srv://chatuser:chat123@sc.xoed8vb.mongodb.net/?retryWrites=true&w=majority&appName=sc';
 
 mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true,
