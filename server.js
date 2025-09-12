@@ -9,10 +9,21 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
-// MongoDB connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://chatuser:chat123@sc.xoed8vb.mongodb.net/?retryWrites=true&w=majority&appName=sc', {
+const mongoose = require('mongoose');
+
+const MONGODB_URI = mongodb+srv://chatuser:chat123@sc.xoed8vb.mongodb.net/?retryWrites=true&w=majority&appName=sc;
+
+mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
+})
+.then(() => {
+  console.log('Connected to MongoDB successfully');
+  process.exit(0);
+})
+.catch((error) => {
+  console.error('Error connecting to MongoDB:', error);
+  process.exit(1);
 });
 
 // User Schema
