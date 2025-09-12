@@ -29,11 +29,9 @@ mongoose.connect(MONGODB_URI, {
 })
 .then(() => {
   console.log('Connected to MongoDB successfully');
-  // Removed process.exit(0) - this was causing the server to exit immediately
 })
 .catch((error) => {
   console.error('Error connecting to MongoDB:', error);
-  // Removed process.exit(1) - let the server continue running even if DB connection fails
 });
 
 // User Schema
@@ -65,9 +63,30 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Add JSON parsing middleware
 app.use(express.json());
 
+// Store connected users
+const connectedUsers = new Map();
+
 // Socket.io connection handling
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
+  
+  // Auto-login event
+  socket.on('auto-login', async (data) => {
+    try {
+      const { username } = data;
+      
+      const user = await User.findOne({ username });
+      if (user) {
+        // Store user connection
+        connectedUsers.set(username, socket.id);
+        socket.emit('auth-response', { success: true, user: { username } });
+      } else {
+        socket.emit('auth-response', { success: false, message: 'User not found' });
+      }
+    } catch (error) {
+      socket.emit('auth-response', { success: false, message: 'Auto-login failed' });
+    }
+  });
   
   // Authentication events
   socket.on('register', async (data) => {
@@ -84,6 +103,8 @@ io.on('connection', (socket) => {
       const newUser = new User({ username, password: hashedPassword });
       await newUser.save();
       
+      // Store user connection
+      connectedUsers.set(username, socket.id);
       socket.emit('auth-response', { success: true, user: { username } });
     } catch (error) {
       socket.emit('auth-response', { success: false, message: 'Registration failed' });
@@ -106,6 +127,8 @@ io.on('connection', (socket) => {
         return;
       }
       
+      // Store user connection
+      connectedUsers.set(username, socket.id);
       socket.emit('auth-response', { success: true, user: { username } });
     } catch (error) {
       socket.emit('auth-response', { success: false, message: 'Login failed' });
@@ -176,6 +199,13 @@ io.on('connection', (socket) => {
       });
       
       await newRequest.save();
+      
+      // Notify the recipient if they're online
+      const recipientSocketId = connectedUsers.get(friendUsername);
+      if (recipientSocketId) {
+        io.to(recipientSocketId).emit('new-request', { from: username });
+      }
+      
       socket.emit('friend-added', { success: true, message: 'Friend request sent' });
     } catch (error) {
       console.error('Error adding friend:', error);
@@ -196,12 +226,19 @@ io.on('connection', (socket) => {
       socket.emit('get-friends', { username });
       
       // Notify the requester if they're online
-      const requester = await User.findOne({ username: requestUsername });
-      if (requester) {
-        // In a real app, you'd need to find the socket of the requester
-        // For now, we'll just update the current user's view
-        socket.emit('requests-list', await getPendingRequests(username));
+      const requesterSocketId = connectedUsers.get(requestUsername);
+      if (requesterSocketId) {
+        io.to(requesterSocketId).emit('get-friends', { username: requestUsername });
       }
+      
+      // Refresh requests list
+      const requests = await FriendRequest.find({
+        to: username,
+        status: 'pending'
+      });
+      
+      const requestList = requests.map(req => req.from);
+      socket.emit('requests-list', requestList);
     } catch (error) {
       console.error('Error accepting request:', error);
     }
@@ -216,7 +253,13 @@ io.on('connection', (socket) => {
       );
       
       // Refresh requests list
-      socket.emit('requests-list', await getPendingRequests(username));
+      const requests = await FriendRequest.find({
+        to: username,
+        status: 'pending'
+      });
+      
+      const requestList = requests.map(req => req.from);
+      socket.emit('requests-list', requestList);
     } catch (error) {
       console.error('Error rejecting request:', error);
     }
@@ -236,6 +279,12 @@ io.on('connection', (socket) => {
       
       // Refresh friends list
       socket.emit('get-friends', { username });
+      
+      // Notify the friend if they're online
+      const friendSocketId = connectedUsers.get(friendUsername);
+      if (friendSocketId) {
+        io.to(friendSocketId).emit('get-friends', { username: friendUsername });
+      }
     } catch (error) {
       console.error('Error removing friend:', error);
     }
@@ -255,8 +304,13 @@ io.on('connection', (socket) => {
       await newMessage.save();
       
       // Send to recipient if online
-      // In a real app, you'd need to find the recipient's socket
-      socket.emit('new-message', { from, message });
+      const recipientSocketId = connectedUsers.get(to);
+      if (recipientSocketId) {
+        io.to(recipientSocketId).emit('new-message', { from, message });
+      }
+      
+      // Also send back to sender for immediate UI update
+      socket.emit('new-message', { from, message, self: true });
     } catch (error) {
       console.error('Error sending message:', error);
     }
@@ -281,18 +335,16 @@ io.on('connection', (socket) => {
   
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);
+    
+    // Remove user from connected users
+    for (let [username, socketId] of connectedUsers.entries()) {
+      if (socketId === socket.id) {
+        connectedUsers.delete(username);
+        break;
+      }
+    }
   });
 });
-
-// Helper function to get pending requests
-async function getPendingRequests(username) {
-  const requests = await FriendRequest.find({
-    to: username,
-    status: 'pending'
-  });
-  
-  return requests.map(req => req.from);
-}
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {

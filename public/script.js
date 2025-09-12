@@ -1,3 +1,17 @@
+// Add session management functions
+function saveUserSession(username) {
+  localStorage.setItem('chatUser', username);
+}
+
+function getUserSession() {
+  return localStorage.getItem('chatUser');
+}
+
+function clearUserSession() {
+  localStorage.removeItem('chatUser');
+}
+
+// Initialize socket connection
 const socket = io();
 
 // DOM elements
@@ -31,6 +45,15 @@ messageInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') sendMessage();
 });
 
+// Check for existing session on page load
+document.addEventListener('DOMContentLoaded', function() {
+  const savedUser = getUserSession();
+  if (savedUser) {
+    // Auto-login the user
+    socket.emit('auto-login', { username: savedUser });
+  }
+});
+
 // Socket event listeners
 socket.on('connect', () => {
     console.log('Connected to server');
@@ -43,11 +66,15 @@ socket.on('auth-response', (data) => {
         authSection.classList.remove('active');
         chatSection.classList.add('active');
         
+        // Save user session
+        saveUserSession(currentUser.username);
+        
         // Load friends and requests with username included
         socket.emit('get-friends', { username: currentUser.username });
         socket.emit('get-requests', { username: currentUser.username });
     } else {
         alert('Error: ' + data.message);
+        clearUserSession();
     }
 });
 
@@ -125,17 +152,26 @@ socket.on('requests-list', (requests) => {
     });
 });
 
+socket.on('new-request', (data) => {
+    // Refresh requests list when a new request is received
+    socket.emit('get-requests', { username: currentUser.username });
+});
+
 socket.on('new-message', (data) => {
-    if (data.from === activeFriend) {
-        addMessage(data.message, false);
+    // Check if the message is for the active chat
+    if (data.from === activeFriend || data.self) {
+        addMessage(data.message, data.self || data.from === currentUser.username);
     }
 });
 
 socket.on('chat-history', (messages) => {
     messagesContainer.innerHTML = '';
     messages.forEach(message => {
-        addMessage(message.text, message.sender === currentUser.username);
+        addMessage(message.text, message.from === currentUser.username);
     });
+    
+    // Scroll to bottom
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
 });
 
 socket.on('friend-added', (data) => {
@@ -172,6 +208,7 @@ function register() {
 }
 
 function logout() {
+    clearUserSession();
     currentUser = null;
     authSection.classList.add('active');
     chatSection.classList.remove('active');
