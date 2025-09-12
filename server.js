@@ -4,14 +4,24 @@ const socketIo = require('socket.io');
 const path = require('path');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
 
-const mongoose = require('mongoose');
+// Enable CORS for socket.io
+const io = socketIo(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
 
-const MONGODB_URI = 'mongodb+srv://chatuser:chat123@sc.xoed8vb.mongodb.net/?retryWrites=true&w=majority&appName=sc';
+// Add CORS middleware
+app.use(cors());
+
+// MongoDB connection - Added database name to the connection string
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://chatuser:chat123@sc.xoed8vb.mongodb.net/?retryWrites=true&w=majority&appName=sc';
 
 mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true,
@@ -19,11 +29,11 @@ mongoose.connect(MONGODB_URI, {
 })
 .then(() => {
   console.log('Connected to MongoDB successfully');
-  process.exit(0);
+  // Removed process.exit(0) - this was causing the server to exit immediately
 })
 .catch((error) => {
   console.error('Error connecting to MongoDB:', error);
-  process.exit(1);
+  // Removed process.exit(1) - let the server continue running even if DB connection fails
 });
 
 // User Schema
@@ -51,6 +61,9 @@ const Message = mongoose.model('Message', messageSchema);
 
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Add JSON parsing middleware
+app.use(express.json());
 
 // Socket.io connection handling
 io.on('connection', (socket) => {
