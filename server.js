@@ -21,7 +21,7 @@ const io = socketIo(server, {
 app.use(cors());
 
 // MongoDB connection - Added database name to the connection string
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://chatuser:chat123@sc.xoed8vb.mongodb.net/sc?retryWrites=true&w=majority&appName=sc';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://chatuser:chat123@sc.xoed8vb.mongodb.net/?retryWrites=true&w=majority&appName=sc';
 
 mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true,
