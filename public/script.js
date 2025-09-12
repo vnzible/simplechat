@@ -256,3 +256,87 @@ function loadChat(friend) {
         withUser: friend 
     });
 }
+
+
+
+// Add this event listener for real-time friend list updates
+socket.on('friends-list', (friends) => {
+  friendsList.innerHTML = '';
+  friends.forEach(friend => {
+    const friendElement = document.createElement('div');
+    friendElement.className = 'friend-item';
+    friendElement.innerHTML = `
+      <span>${friend}</span>
+      <div>
+        <button class="chat-btn" data-friend="${friend}">Chat</button>
+        <button class="remove-btn" data-friend="${friend}">Remove</button>
+      </div>
+    `;
+    friendsList.appendChild(friendElement);
+  });
+  
+  // Add event listeners to new buttons
+  document.querySelectorAll('.chat-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      activeFriend = e.target.getAttribute('data-friend');
+      activeChat.textContent = `Chat with ${activeFriend}`;
+      messageInput.disabled = false;
+      sendBtn.disabled = false;
+      loadChat(activeFriend);
+    });
+  });
+  
+  document.querySelectorAll('.remove-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const friend = e.target.getAttribute('data-friend');
+      socket.emit('remove-friend', { 
+        username: currentUser.username, 
+        friendUsername: friend 
+      });
+    });
+  });
+});
+
+// Add this event listener for real-time request list updates
+socket.on('requests-list', (requests) => {
+  friendRequests.innerHTML = '';
+  requests.forEach(request => {
+    const requestElement = document.createElement('div');
+    requestElement.className = 'request-item';
+    requestElement.innerHTML = `
+      <span>${request}</span>
+      <div>
+        <button class="accept-btn" data-request="${request}">Accept</button>
+        <button class="reject-btn" data-request="${request}">Reject</button>
+      </div>
+    `;
+    friendRequests.appendChild(requestElement);
+  });
+  
+  // Add event listeners to new buttons
+  document.querySelectorAll('.accept-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const request = e.target.getAttribute('data-request');
+      socket.emit('accept-request', { 
+        username: currentUser.username, 
+        requestUsername: request 
+      });
+    });
+  });
+  
+  document.querySelectorAll('.reject-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const request = e.target.getAttribute('data-request');
+      socket.emit('reject-request', { 
+        username: currentUser.username, 
+        requestUsername: request 
+      });
+    });
+  });
+});
+
+// Add this event listener for new friend requests
+socket.on('new-request', () => {
+  // Refresh requests list when a new request is received
+  socket.emit('get-requests', { username: currentUser.username });
+});

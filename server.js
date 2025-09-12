@@ -213,82 +213,85 @@ io.on('connection', (socket) => {
     }
   });
   
-  socket.on('accept-request', async (data) => {
-    try {
-      const { username, requestUsername } = data;
-      
-      await FriendRequest.findOneAndUpdate(
-        { from: requestUsername, to: username },
-        { status: 'accepted' }
-      );
-      
-      // Refresh both users' friends lists
-      socket.emit('get-friends', { username });
-      
-      // Notify the requester if they're online
-      const requesterSocketId = connectedUsers.get(requestUsername);
-      if (requesterSocketId) {
-        io.to(requesterSocketId).emit('get-friends', { username: requestUsername });
-      }
-      
-      // Refresh requests list
-      const requests = await FriendRequest.find({
-        to: username,
-        status: 'pending'
-      });
-      
-      const requestList = requests.map(req => req.from);
-      socket.emit('requests-list', requestList);
-    } catch (error) {
-      console.error('Error accepting request:', error);
+  // Update the accept-request event handler
+socket.on('accept-request', async (data) => {
+  try {
+    const { username, requestUsername } = data;
+    
+    await FriendRequest.findOneAndUpdate(
+      { from: requestUsername, to: username },
+      { status: 'accepted' }
+    );
+    
+    // Refresh both users' friends lists
+    const userFriends = await FriendRequest.find({
+      $or: [{ from: username }, { to: username }],
+      status: 'accepted'
+    }).then(friends => friends.map(req => req.from === username ? req.to : req.from));
+    
+    const requesterFriends = await FriendRequest.find({
+      $or: [{ from: requestUsername }, { to: requestUsername }],
+      status: 'accepted'
+    }).then(friends => friends.map(req => req.from === requestUsername ? req.to : req.from));
+    
+    // Send updated friends list to both users
+    socket.emit('friends-list', userFriends);
+    
+    // Notify the requester if they're online
+    const requesterSocketId = connectedUsers.get(requestUsername);
+    if (requesterSocketId) {
+      io.to(requesterSocketId).emit('friends-list', requesterFriends);
     }
-  });
-  
-  socket.on('reject-request', async (data) => {
-    try {
-      const { username, requestUsername } = data;
-      
-      await FriendRequest.findOneAndDelete(
-        { from: requestUsername, to: username }
-      );
-      
-      // Refresh requests list
-      const requests = await FriendRequest.find({
-        to: username,
-        status: 'pending'
-      });
-      
-      const requestList = requests.map(req => req.from);
-      socket.emit('requests-list', requestList);
-    } catch (error) {
-      console.error('Error rejecting request:', error);
+    
+    // Refresh requests list
+    const requests = await FriendRequest.find({
+      to: username,
+      status: 'pending'
+    });
+    
+    const requestList = requests.map(req => req.from);
+    socket.emit('requests-list', requestList);
+  } catch (error) {
+    console.error('Error accepting request:', error);
+  }
+});
+
+// Update the remove-friend event handler
+socket.on('remove-friend', async (data) => {
+  try {
+    const { username, friendUsername } = data;
+    
+    await FriendRequest.findOneAndDelete({
+      $or: [
+        { from: username, to: friendUsername },
+        { from: friendUsername, to: username }
+      ],
+      status: 'accepted'
+    });
+    
+    // Refresh friends list for both users
+    const userFriends = await FriendRequest.find({
+      $or: [{ from: username }, { to: username }],
+      status: 'accepted'
+    }).then(friends => friends.map(req => req.from === username ? req.to : req.from));
+    
+    const friendFriends = await FriendRequest.find({
+      $or: [{ from: friendUsername }, { to: friendUsername }],
+      status: 'accepted'
+    }).then(friends => friends.map(req => req.from === friendUsername ? req.to : req.from));
+    
+    // Send updated friends list to both users
+    socket.emit('friends-list', userFriends);
+    
+    // Notify the friend if they're online
+    const friendSocketId = connectedUsers.get(friendUsername);
+    if (friendSocketId) {
+      io.to(friendSocketId).emit('friends-list', friendFriends);
     }
-  });
-  
-  socket.on('remove-friend', async (data) => {
-    try {
-      const { username, friendUsername } = data;
-      
-      await FriendRequest.findOneAndDelete({
-        $or: [
-          { from: username, to: friendUsername },
-          { from: friendUsername, to: username }
-        ],
-        status: 'accepted'
-      });
-      
-      // Refresh friends list
-      socket.emit('get-friends', { username });
-      
-      // Notify the friend if they're online
-      const friendSocketId = connectedUsers.get(friendUsername);
-      if (friendSocketId) {
-        io.to(friendSocketId).emit('get-friends', { username: friendUsername });
-      }
-    } catch (error) {
-      console.error('Error removing friend:', error);
-    }
-  });
+  } catch (error) {
+    console.error('Error removing friend:', error);
+  }
+});
   
   // Messaging events
   socket.on('send-message', async (data) => {
