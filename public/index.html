@@ -1,27 +1,536 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Ultra Chat</title>
-  <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&family=Poppins:wght@300;400;600&display=swap">
+  <style>
+    /* Reset and base */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Poppins',sans-serif;
+      background: linear-gradient(135deg, #0a0a1a 0%, #0f0f1f 25%, #141428 50%, #0c0c1f 75%, #070716 100%);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      color:#f0f0f0; 
+      min-height:100vh; 
+      display:flex; 
+      flex-direction:column;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    
+    #particles-js {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+    
+    .section{display:none} 
+    .section.active{display:block}
+    
+    /* Auth */
+    #auth-section{
+      max-width:400px;
+      margin:100px auto;
+      padding:30px;
+      border-radius:16px;
+      background:rgba(10, 15, 35, 0.3);
+      backdrop-filter:blur(12px);
+      border: 1px solid rgba(100, 220, 255, 0.15);
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.1),
+                  0 0 40px rgba(0, 150, 255, 0.1),
+                  inset 0 0 15px rgba(0, 200, 255, 0.1);
+      text-align:center;
+      transition: all 0.3s ease;
+    }
+    
+    #auth-section:hover {
+      box-shadow: 0 0 25px rgba(0, 255, 255, 0.2),
+                  0 0 50px rgba(0, 150, 255, 0.2),
+                  inset 0 0 20px rgba(0, 200, 255, 0.15);
+      transform: translateY(-2px);
+    }
+    
+    #auth-form input{
+      width:100%;
+      padding:12px;
+      margin:10px 0;
+      border-radius:10px;
+      border:none;
+      background: rgba(10, 20, 40, 0.4);
+      border: 1px solid rgba(0, 200, 255, 0.3);
+      color:#fff;
+      transition: all 0.3s ease;
+      box-shadow: inset 0 0 10px rgba(0, 50, 100, 0.3),
+                  0 0 5px rgba(0, 150, 255, 0.1);
+    }
+    
+    #auth-form input:focus {
+      border-color: rgba(0, 230, 255, 0.7);
+      box-shadow: inset 0 0 15px rgba(0, 80, 160, 0.4),
+                  0 0 15px rgba(0, 180, 255, 0.3);
+      outline: none;
+    }
+    
+    #auth-form input::placeholder{color:#bbb}
+    
+    /* Buttons */
+    .btn{
+      padding:10px 14px;
+      border-radius:10px;
+      border:none;
+      cursor:pointer;
+      font-weight:600;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      text-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
+      box-shadow: 0 0 10px rgba(0, 200, 255, 0.3);
+    }
+    
+    .btn:before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: rgba(255, 255, 255, 0.1);
+      transform: rotate(45deg);
+      transition: all 0.6s ease;
+      opacity: 0;
+    }
+    
+    .btn:hover:before {
+      opacity: 1;
+      top: -20%;
+      left: -20%;
+    }
+    
+    .btn.primary{
+      background:linear-gradient(135deg,#00e6ff,#0080ff);
+      color:#000;
+      box-shadow: 0 0 10px rgba(0, 230, 255, 0.5),
+                  0 0 20px rgba(0, 150, 255, 0.3);
+    }
+    
+    .btn.primary:hover{
+      box-shadow: 0 0 15px rgba(0, 230, 255, 0.7),
+                  0 0 30px rgba(0, 150, 255, 0.4);
+      transform: translateY(-2px);
+    }
+    
+    .btn.secondary{
+      background:transparent;
+      border:1px solid #00e6ff;
+      color:#00e6ff;
+      box-shadow: 0 0 8px rgba(0, 230, 255, 0.3),
+                  inset 0 0 8px rgba(0, 230, 255, 0.2);
+    }
+    
+    .btn.secondary:hover{
+      box-shadow: 0 0 12px rgba(0, 230, 255, 0.5),
+                  inset 0 0 12px rgba(0, 230, 255, 0.3);
+      background: rgba(0, 230, 255, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    .btn.danger{
+      background:linear-gradient(135deg,#ff0066,#ff3300);
+      box-shadow: 0 0 10px rgba(255, 0, 102, 0.5),
+                  0 0 20px rgba(255, 51, 0, 0.3);
+      color:#fff;
+    }
+    
+    .btn.danger:hover{
+      box-shadow: 0 0 15px rgba(255, 0, 102, 0.7),
+                  0 0 30px rgba(255, 51, 0, 0.4);
+      transform: translateY(-2px);
+    }
+    
+    .btn.small{
+      padding:6px 8px;
+      border-radius:8px;
+      font-size:0.9rem;
+    }
+    
+    /* Layout */
+    header{
+      background: rgba(15, 20, 40, 0.4);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid rgba(0, 200, 255, 0.2);
+      box-shadow: 0 5px 25px rgba(0, 100, 255, 0.15);
+      padding:12px 18px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+    
+    #main-content{
+      display:flex;
+      height:calc(100vh - 72px);
+    }
+    
+    /* Friends sidebar */
+    #friends-section{
+      width:320px;
+      padding:16px;
+      background:rgba(255,255,255,0.03);
+      border-right:1px solid rgba(255,255,255,0.05);
+      overflow-y:auto;
+    }
+    
+    #friend-actions{
+      display:flex;
+      gap:8px;
+      margin-bottom:12px;
+    }
+    
+    #friend-username{
+      flex:1;
+      padding:8px;
+      border-radius:8px;
+      border:none;
+      background: rgba(10, 20, 40, 0.4);
+      border: 1px solid rgba(0, 200, 255, 0.3);
+      color:#fff;
+      transition: all 0.3s ease;
+      box-shadow: inset 0 0 10px rgba(0, 50, 100, 0.3),
+                  0 0 5px rgba(0, 150, 255, 0.1);
+    }
+    
+    #friend-username:focus {
+      border-color: rgba(0, 230, 255, 0.7);
+      box-shadow: inset 0 0 15px rgba(0, 80, 160, 0.4),
+                  0 0 15px rgba(0, 180, 255, 0.3);
+      outline: none;
+    }
+    
+    .friend-item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:10px;
+      border-radius:10px;
+      margin-bottom:8px;
+      background:rgba(255,255,255,0.02);
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+    }
+    
+    .friend-item:hover {
+      background: rgba(0, 150, 255, 0.15);
+      border: 1px solid rgba(0, 200, 255, 0.3);
+      box-shadow: 0 0 10px rgba(0, 150, 255, 0.2);
+      transform: translateX(5px);
+    }
+    
+    .friend-left{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    
+    .friend-name{
+      font-weight:600;
+    }
+    
+    .status-dot{
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      background:#6c757d;
+      display:inline-block;
+    }
+    
+    .status-dot.online{
+      background:#43d86a;
+      box-shadow:0 0 6px rgba(67,216,106,0.8);
+      animation: statusPulse 2s infinite;
+    }
+    
+    @keyframes statusPulse {
+      0% { box-shadow: 0 0 0 0 rgba(67, 216, 106, 0.8); }
+      70% { box-shadow: 0 0 0 10px rgba(67, 216, 106, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(67, 216, 106, 0); }
+    }
+    
+    .unread-badge{
+      background: linear-gradient(135deg, #ff0066, #ff3300);
+      color:#fff;
+      padding:4px 8px;
+      border-radius:999px;
+      font-size:0.85rem;
+      margin-left:8px;
+      box-shadow: 0 0 8px rgba(255, 0, 102, 0.5);
+      animation: badgePulse 2s infinite;
+    }
+    
+    @keyframes badgePulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    
+    /* Chat area */
+    #chat-container{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      background:rgba(255,255,255,0.02);
+    }
+    
+    #chat-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:12px;
+      border-bottom:1px solid rgba(255,255,255,0.04);
+    }
+    
+    #messages{
+      flex:1;
+      padding:16px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      overflow-y:auto;
+    }
+    
+    /* message bubbles */
+    .message{
+      max-width:70%;
+      padding:10px 14px;
+      border-radius:18px;
+      position:relative;
+    }
+    
+    .message.sent{
+      margin-left:auto;
+      background:linear-gradient(135deg,#00e6ff,#0080ff);
+      color:#000;
+      box-shadow: 0 0 10px rgba(0, 200, 255, 0.3);
+      animation: messageSent 0.3s ease;
+    }
+    
+    @keyframes messageSent {
+      from { transform: translateX(20px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    .message.received{
+      background:rgba(255,255,255,0.06);
+      align-self:flex-start;
+      color:#fff;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+      animation: messageReceived 0.3s ease;
+    }
+    
+    @keyframes messageReceived {
+      from { transform: translateX(-20px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    .message .meta{
+      font-size:0.75rem;
+      margin-top:6px;
+      opacity:0.8;
+    }
+    
+    .message .three-dots{
+      position:absolute;
+      right:8px;
+      top:6px;
+      padding:4px;
+      border-radius:6px;
+      display:none;
+      cursor:pointer;
+    }
+    
+    .message:hover .three-dots{
+      display:block;
+    }
+    
+    .three-dots>button{
+      background:transparent;
+      border:none;
+      color:inherit;
+      cursor:pointer;
+      padding:4px;
+    }
+    
+    /* deleted message look */
+    .message.deleted{
+      font-style:italic;
+      opacity:0.8;
+      background:rgba(255,255,255,0.02);
+      color:#aaa;
+    }
+    
+    /* reply preview above input */
+    .reply-preview{
+      padding:8px;
+      background:rgba(0, 50, 100, 0.3);
+      border-left:3px solid #00e6ff;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      box-shadow: 0 0 10px rgba(0, 200, 255, 0.2);
+    }
+    
+    .reply-preview.hidden{
+      display:none;
+    }
+    
+    .reply-text{
+      font-size:0.9rem;
+      color:#ddd;
+    }
+    
+    /* input */
+    #message-input{
+      display:flex;
+      gap:8px;
+      padding:12px;
+      border-top:1px solid rgba(255,255,255,0.04);
+    }
+    
+    #message{
+      flex:1;
+      padding:12px;
+      border-radius:20px;
+      border:none;
+      background: rgba(10, 20, 40, 0.4);
+      border: 1px solid rgba(0, 200, 255, 0.3);
+      color:#fff;
+      transition: all 0.3s ease;
+      box-shadow: inset 0 0 10px rgba(0, 50, 100, 0.3),
+                  0 0 5px rgba(0, 150, 255, 0.1);
+    }
+    
+    #message:focus {
+      border-color: rgba(0, 230, 255, 0.7);
+      box-shadow: inset 0 0 15px rgba(0, 80, 160, 0.4),
+                  0 0 15px rgba(0, 180, 255, 0.3);
+      outline: none;
+    }
+    
+    /* small helpers */
+    .muted{color:#bfbfbf}
+    .small{font-size:0.85rem}
+    
+    /* Neon Text Effects */
+    .title {
+      font-family: 'Orbitron', sans-serif;
+      text-shadow: 0 0 10px rgba(0, 200, 255, 0.7),
+                   0 0 20px rgba(0, 150, 255, 0.5),
+                   0 0 30px rgba(0, 100, 255, 0.3);
+      color: #fff;
+      animation: neonPulse 2s infinite alternate;
+    }
+    
+    @keyframes neonPulse {
+      from { text-shadow: 0 0 10px rgba(0, 200, 255, 0.7), 0 0 20px rgba(0, 150, 255, 0.5), 0 0 30px rgba(0, 100, 255, 0.3); }
+      to { text-shadow: 0 0 15px rgba(0, 220, 255, 0.8), 0 0 25px rgba(0, 170, 255, 0.6), 0 0 35px rgba(0, 120, 255, 0.4); }
+    }
+    
+    .subtitle {
+      color: #a0f0ff;
+      text-shadow: 0 0 8px rgba(0, 200, 255, 0.5);
+    }
+    
+    /* Logo Enhancement */
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      text-shadow: 0 0 10px rgba(0, 200, 255, 0.7),
+                   0 0 20px rgba(0, 150, 255, 0.5);
+      color: #fff;
+      animation: logoGlow 3s infinite alternate;
+    }
+    
+    @keyframes logoGlow {
+      from { text-shadow: 0 0 10px rgba(0, 200, 255, 0.7), 0 0 20px rgba(0, 150, 255, 0.5); }
+      to { text-shadow: 0 0 15px rgba(0, 220, 255, 0.8), 0 0 30px rgba(0, 170, 255, 0.6), 0 0 40px rgba(0, 120, 255, 0.4); }
+    }
+    
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 30, 60, 0.2);
+      border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 200, 255, 0.5);
+      border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 230, 255, 0.7);
+      box-shadow: 0 0 5px rgba(0, 200, 255, 0.5);
+    }
+    
+    /* Section Transitions */
+    .section {
+      animation: fadeIn 0.5s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Mobile Responsiveness Enhancements */
+    @media (max-width:768px){
+      #main-content{flex-direction:column}
+      #friends-section{width:100%;height:30vh;order:2}
+      #chat-container{order:1;height:70vh}
+      
+      #auth-section {
+        margin: 50px 20px;
+        padding: 20px;
+      }
+      
+      .title {
+        font-size: 1.8rem;
+      }
+      
+      .btn {
+        padding: 12px 16px;
+      }
+    }
+  </style>
 </head>
 <body>
+  <!-- Particle Background Container -->
+  <div id="particles-js"></div>
+  
   <div id="app">
-    <!-- Login/Register Section -->
     <div id="auth-section" class="section active glass-card">
       <h1 class="title">Ultra Chat</h1>
       <p class="subtitle">Cinematic • Techy • Premium</p>
       <div id="auth-form">
-        <input type="text" id="username" placeholder="Username" required>
+        <input type="text" id="username" placeholder="Username (1-12 chars)" required>
         <input type="password" id="password" placeholder="Password" required>
         <button id="login-btn" class="btn primary">Log In</button>
         <button id="register-btn" class="btn secondary">Register</button>
       </div>
     </div>
 
-    <!-- Main Chat Section -->
     <div id="chat-section" class="section">
       <header class="glass-nav">
         <h2 class="logo">Ultra Chat</h2>
@@ -32,7 +541,6 @@
       </header>
 
       <div id="main-content">
-        <!-- Friends Section -->
         <div id="friends-section" class="glass-card">
           <h3>Friends</h3>
           <div id="friend-actions">
@@ -40,17 +548,28 @@
             <button id="add-friend-btn" class="btn primary">Add Friend</button>
           </div>
           <div id="friends-list"></div>
-          
+
           <h3>Friend Requests</h3>
           <div id="friend-requests"></div>
         </div>
 
-        <!-- Chat Section -->
         <div id="chat-container" class="glass-card">
           <div id="chat-header">
-            <h3 id="active-chat">Select a friend to chat</h3>
+            <div>
+              <h3 id="active-chat">Select a friend to chat</h3>
+              <div id="last-seen" class="muted small"></div>
+            </div>
+            <div id="typing-indicator" class="muted small"></div>
           </div>
+
           <div id="messages"></div>
+
+          <div id="reply-preview" class="reply-preview hidden">
+            <div class="reply-meta"><strong id="reply-who"></strong></div>
+            <div id="reply-text" class="reply-text"></div>
+            <button id="cancel-reply" class="btn small">x</button>
+          </div>
+
           <div id="message-input">
             <input type="text" id="message" placeholder="Type a message..." disabled>
             <button id="send-btn" disabled class="btn primary">Send</button>
@@ -60,7 +579,47 @@
     </div>
   </div>
 
-  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <script>
+    // Initialize particles.js for the background
+    document.addEventListener('DOMContentLoaded', function() {
+      particlesJS('particles-js', {
+        particles: {
+          number: { value: 80, density: { enable: true, value_area: 800 } },
+          color: { value: "#00e6ff" },
+          shape: { type: "circle" },
+          opacity: { value: 0.5, random: true },
+          size: { value: 3, random: true },
+          line_linked: {
+            enable: true,
+            distance: 150,
+            color: "#00a0ff",
+            opacity: 0.4,
+            width: 1
+          },
+          move: {
+            enable: true,
+            speed: 2,
+            direction: "none",
+            random: true,
+            straight: false,
+            out_mode: "out",
+            bounce: false
+          }
+        },
+        interactivity: {
+          detect_on: "canvas",
+          events: {
+            onhover: { enable: true, mode: "grab" },
+            onclick: { enable: true, mode: "push" },
+            resize: true
+          }
+        },
+        retina_detect: true
+      });
+    });
+  </script>
+   <script src="/socket.io/socket.io.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
