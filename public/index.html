@@ -1,64 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Chat</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ultra Chat</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="app">
-        <!-- Login/Register Section -->
-        <div id="auth-section" class="section active">
-            <h1>Welcome to Simple Chat</h1>
-            <div id="auth-form">
-                <input type="text" id="username" placeholder="Username" required>
-                <input type="password" id="password" placeholder="Password" required>
-                <button id="login-btn">Log In</button>
-                <button id="register-btn">Register</button>
-            </div>
-        </div>
-
-        <!-- Main Chat Section -->
-        <div id="chat-section" class="section">
-            <header>
-                <h2>Simple Chat</h2>
-                <div id="user-info">
-                    <span id="current-user"></span>
-                    <button id="logout-btn">Log Out</button>
-                </div>
-            </header>
-
-            <div id="main-content">
-                <!-- Friends Section -->
-                <div id="friends-section">
-                    <h3>Friends</h3>
-                    <div id="friend-actions">
-                        <input type="text" id="friend-username" placeholder="Friend's username">
-                        <button id="add-friend-btn">Add Friend</button>
-                    </div>
-                    <div id="friends-list"></div>
-                    
-                    <h3>Friend Requests</h3>
-                    <div id="friend-requests"></div>
-                </div>
-
-                <!-- Chat Section -->
-                <div id="chat-container">
-                    <div id="chat-header">
-                        <h3 id="active-chat">Select a friend to chat</h3>
-                    </div>
-                    <div id="messages"></div>
-                    <div id="message-input">
-                        <input type="text" id="message" placeholder="Type a message..." disabled>
-                        <button id="send-btn" disabled>Send</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+  <div id="app">
+    <!-- Login/Register Section -->
+    <div id="auth-section" class="section active glass-card">
+      <h1 class="title">Ultra Chat</h1>
+      <p class="subtitle">Cinematic • Techy • Premium</p>
+      <div id="auth-form">
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button id="login-btn" class="btn primary">Log In</button>
+        <button id="register-btn" class="btn secondary">Register</button>
+      </div>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="script.js"></script>
+    <!-- Main Chat Section -->
+    <div id="chat-section" class="section">
+      <header class="glass-nav">
+        <h2 class="logo">Ultra Chat</h2>
+        <div id="user-info">
+          <span id="current-user" class="username"></span>
+          <button id="logout-btn" class="btn danger small">Log Out</button>
+        </div>
+      </header>
+
+      <div id="main-content">
+        <!-- Friends Section -->
+        <div id="friends-section" class="glass-card">
+          <h3>Friends</h3>
+          <div id="friend-actions">
+            <input type="text" id="friend-username" placeholder="Friend's username">
+            <button id="add-friend-btn" class="btn primary">Add Friend</button>
+          </div>
+          <div id="friends-list"></div>
+          
+          <h3>Friend Requests</h3>
+          <div id="friend-requests"></div>
+        </div>
+
+        <!-- Chat Section -->
+        <div id="chat-container" class="glass-card">
+          <div id="chat-header">
+            <h3 id="active-chat">Select a friend to chat</h3>
+          </div>
+          <div id="messages"></div>
+          <div id="message-input">
+            <input type="text" id="message" placeholder="Type a message..." disabled>
+            <button id="send-btn" disabled class="btn primary">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
