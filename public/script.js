@@ -257,76 +257,99 @@ function sendMessage(){
   stopTypingEmit();
 }
 function addMessageToUI(msg){
-  // msg fields: _id, from, to, text, timestamp, isRead, deleted, replyTo
   const isSent = msg.from === currentUser.username;
   const el = document.createElement('div');
   el.className = `message ${isSent ? 'sent' : 'received'} ${msg.deleted ? 'deleted' : ''}`;
   if (msg._id) el.setAttribute('data-id', msg._id);
 
-  // build content (if deleted show placeholder)
   const contentText = msg.deleted ? 'Message deleted' : (msg.text || '');
-  const replyPart = msg.replyTo ? `<div class="reply-snippet">↪️ reply</div>` : '';
+
+  // --- reply snippet handling ---
+  let replySnippet = '';
+  if (msg.replyTo) {
+    const repliedMsg = document.querySelector(`[data-id="${msg.replyTo}"]`);
+    let repliedText = repliedMsg ? repliedMsg.querySelector('.msg-content').textContent : '[original message]';
+    replySnippet = `
+      <div class="reply-snippet" style="
+        font-size:0.8rem;
+        opacity:0.8;
+        border-left:3px solid #00e6ff;
+        padding-left:6px;
+        margin-bottom:4px;
+      ">
+        ${repliedText}
+      </div>`;
+  }
+
   el.innerHTML = `
+    ${replySnippet}
     <div class="msg-content">${contentText}</div>
     <div class="meta">${msg.timestamp ? new Date(msg.timestamp).toLocaleString() : ''}</div>
     <div class="three-dots">
-      ${isSent ? '<button class="dots-btn">⋯</button>' : '<button class="dots-btn">⋯</button>'}
+      <button class="dots-btn">⋯</button>
       <div class="dots-menu hidden"></div>
     </div>
   `;
   messagesContainer.appendChild(el);
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  
 
-  // populate dots menu
-  const dotsBtn = el.querySelector('.dots-btn');
-  const menu = el.querySelector('.dots-menu');
-  if (dotsBtn) {
-    // create menu options when clicked
-    dotsBtn.addEventListener('click', (e)=>{
-      e.stopPropagation();
-      // toggle visible menu
-      menu.classList.toggle('hidden');
-      menu.style.position = 'absolute';
-      menu.style.right = '6px';
-      menu.style.top = '28px';
-      menu.style.background = 'rgba(0,0,0,0.6)';
-      menu.style.borderRadius = '8px';
-      menu.style.padding = '6px';
-      menu.style.minWidth = '120px';
-      menu.style.boxShadow = '0 6px 18px rgba(0,0,0,0.6)';
-      menu.innerHTML = '';
-      // Reply option (for all)
-      const replyBtn = document.createElement('button');
-      replyBtn.textContent = 'Reply';
-      replyBtn.className = 'btn small';
-      replyBtn.style.display = 'block';
-      replyBtn.style.marginBottom = '6px';
-      replyBtn.addEventListener('click', (ev)=>{
+
+
+ // populate dots menu
+const dotsBtn = el.querySelector('.dots-btn');
+const menu = el.querySelector('.dots-menu');
+if (dotsBtn) {
+  dotsBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+
+    if (!menu.classList.contains('hidden')) {
+      menu.classList.add('hidden');
+      return;
+    }
+
+    menu.classList.remove('hidden');
+    menu.innerHTML = '';
+
+    // Reply option
+    const replyBtn = document.createElement('button');
+    replyBtn.textContent = 'Reply';
+    replyBtn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      startReply(msg);
+      menu.classList.add('hidden');
+    });
+    menu.appendChild(replyBtn);
+
+    // Delete option (only if sender & not deleted)
+    if (isSent && !msg.deleted) {
+      const delBtn = document.createElement('button');
+      delBtn.textContent = 'Delete message';
+      delBtn.addEventListener('click', (ev) => {
         ev.stopPropagation();
-        startReply(msg);
+        socket.emit('delete-message', { messageId: msg._id, requestor: currentUser.username });
         menu.classList.add('hidden');
       });
-      menu.appendChild(replyBtn);
+      menu.appendChild(delBtn);
+    }
 
-      // If owned, show delete
-      if (isSent && !msg.deleted) {
-        const delBtn = document.createElement('button');
-        delBtn.textContent = 'Delete message';
-        delBtn.className = 'btn small';
-        delBtn.addEventListener('click', (ev)=>{
-          ev.stopPropagation();
-          socket.emit('delete-message', { messageId: msg._id, requestor: currentUser.username });
-          menu.classList.add('hidden');
-        });
-        menu.appendChild(delBtn);
-      }
-    });
+    // --- Position menu to the LEFT of the message bubble ---
+    document.body.appendChild(menu);
+    const rect = el.getBoundingClientRect(); // whole message bubble
+    menu.style.position = 'absolute';
+    menu.style.top = rect.top + window.scrollY + 'px';
+    menu.style.left = rect.left + window.scrollX - menu.offsetWidth - 8 + 'px'; // 8px gap
+    menu.style.zIndex = 9999;
+  });
 
-    // Hide menu clicking elsewhere
-    document.addEventListener('click', ()=> {
-      if (menu) menu.classList.add('hidden');
-    });
-  }
+  // close when clicking outside
+  document.addEventListener('click', () => menu.classList.add('hidden'));
+}
+
+
+
+
+    
 }
 
 // Reply flow
@@ -382,3 +405,10 @@ socket.on('action-failed', (d) => { if (d && d.message) alert(d.message); });
 
 // extra: click to open friend chat when message from friend arrives (optional UX) done by addMessageToUI routing
 
+// listen for real-time incoming friend requests
+socket.on('new-request', (data) => {
+  if (data && data.from) {
+    // re-fetch requests list
+    socket.emit('get-requests', { username: currentUser.username });
+  }
+});

@@ -369,6 +369,36 @@
       cursor:pointer;
       padding:4px;
     }
+
+    .dots-menu {
+  background: rgba(0,0,0,0.75);
+  border-radius: 8px;
+  padding: 6px;
+  min-width: 140px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+  position: absolute;
+  z-index: 9999;
+}
+
+.dots-menu.hidden {
+  display: none;
+}
+
+.dots-menu button {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #fff;
+  text-align: left;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.dots-menu button:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+
     
     /* deleted message look */
     .message.deleted{
