@@ -305,6 +305,8 @@ if (dotsBtn) {
 
     if (!menu.classList.contains('hidden')) {
       menu.classList.add('hidden');
+      const overlay = document.querySelector('.menu-overlay');
+      if (overlay) overlay.remove();
       return;
     }
 
@@ -318,6 +320,8 @@ if (dotsBtn) {
       ev.stopPropagation();
       startReply(msg);
       menu.classList.add('hidden');
+      const overlay = document.querySelector('.menu-overlay');
+      if (overlay) overlay.remove();
     });
     menu.appendChild(replyBtn);
 
@@ -329,22 +333,41 @@ if (dotsBtn) {
         ev.stopPropagation();
         socket.emit('delete-message', { messageId: msg._id, requestor: currentUser.username });
         menu.classList.add('hidden');
+        const overlay = document.querySelector('.menu-overlay');
+        if (overlay) overlay.remove();
       });
       menu.appendChild(delBtn);
     }
 
-    // --- Position menu to the LEFT of the message bubble ---
+    // --- Create overlay ---
+    const overlay = document.createElement('div');
+    overlay.className = 'menu-overlay';
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.background = 'rgba(0,0,0,0.4)';
+    overlay.style.zIndex = '9998';
+    document.body.appendChild(overlay);
+
+    // clicking overlay closes menu
+    overlay.addEventListener('click', () => {
+      menu.classList.add('hidden');
+      overlay.remove();
+    });
+
+    // --- Position menu in the center of the screen ---
     document.body.appendChild(menu);
-    const rect = el.getBoundingClientRect(); // whole message bubble
-    menu.style.position = 'absolute';
-    menu.style.top = rect.top + window.scrollY + 'px';
-    menu.style.left = rect.left + window.scrollX - menu.offsetWidth - 8 + 'px'; // 8px gap
+    const menuWidth = menu.offsetWidth;
+    const menuHeight = menu.offsetHeight;
+    menu.style.position = 'fixed';
+    menu.style.left = `calc(50% - ${menuWidth / 2}px)`;
+    menu.style.top = `calc(50% - ${menuHeight / 2}px)`;
     menu.style.zIndex = 9999;
   });
-
-  // close when clicking outside
-  document.addEventListener('click', () => menu.classList.add('hidden'));
 }
+
 
 
 
