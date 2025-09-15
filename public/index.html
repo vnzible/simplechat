@@ -543,6 +543,90 @@
         padding: 12px 16px;
       }
     }
+
+    /* Mobile-specific adjustments */
+@media (max-width: 768px){
+  #main-content {
+    flex-direction: column;
+    height: auto;
+    min-height: calc(100vh - 72px);
+  }
+  
+  #friends-section {
+    width: 100%;
+    height: auto;
+    order: 1;
+    display: block;
+  }
+  
+  #chat-container {
+    order: 2;
+    height: 0;
+    overflow: hidden;
+    transition: height 0.3s ease;
+  }
+  
+  #chat-container.active {
+    height: calc(100vh - 72px);
+    position: fixed;
+    top: 72px;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+  }
+  
+  .back-button {
+    display: inline-block;
+    margin-right: 10px;
+    cursor: pointer;
+  }
+  
+  /* Hide chat elements when not active */
+  #chat-container:not(.active) {
+    display: none;
+  }
+}
+
+/* Enhanced Back Button for Mobile */
+.back-button {
+  display: none; /* Hidden by default, shown only on mobile */
+  margin-right: 15px;
+  cursor: pointer;
+  font-size: 28px;
+  font-weight: 900;
+  color: #00e6ff;
+  text-shadow: 0 0 10px rgba(0, 230, 255, 0.7),
+               0 0 20px rgba(0, 200, 255, 0.5);
+  transition: all 0.3s ease;
+  padding: 5px 10px;
+  border-radius: 50%;
+  background: rgba(0, 150, 255, 0.2);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-button:hover {
+  color: #00b3ff;
+  text-shadow: 0 0 15px rgba(0, 230, 255, 0.9),
+               0 0 25px rgba(0, 200, 255, 0.7);
+  background: rgba(0, 150, 255, 0.3);
+  transform: scale(1.1);
+}
+
+/* Show back button only on mobile */
+@media (max-width: 768px) {
+  .back-button {
+    display: flex;
+  }
+  
+  #chat-header {
+    display: flex;
+    align-items: center;
+  }
+}
   </style>
 </head>
 <body>
@@ -584,13 +668,18 @@
         </div>
 
         <div id="chat-container" class="glass-card">
-          <div id="chat-header">
-            <div>
-              <h3 id="active-chat">Select a friend to chat</h3>
-              <div id="last-seen" class="muted small"></div>
-            </div>
-            <div id="typing-indicator" class="muted small"></div>
-          </div>
+         <div id="chat-header">
+  <div style="display: flex; align-items: center;">
+    <div id="back-to-friends" class="back-button" style="display: none;">
+      ←
+    </div>
+    <div>
+      <h3 id="active-chat">Select a friend to chat</h3>
+      <div id="last-seen" class="muted small"></div>
+    </div>
+  </div>
+  <div id="typing-indicator" class="muted small"></div>
+</div>
 
           <div id="messages"></div>
 

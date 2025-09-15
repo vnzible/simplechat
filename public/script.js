@@ -92,15 +92,17 @@ socket.on('friends-list', (friends) => {
   });
 
   // attach listeners
-  document.querySelectorAll('.chat-btn').forEach(btn=>{
-    btn.addEventListener('click', (e)=>{
-      activeFriend = e.target.getAttribute('data-friend');
-      activeChat.textContent = `Chat with ${activeFriend}`;
-      messageInput.disabled = false;
-      sendBtn.disabled = false;
-      loadChat(activeFriend);
-    });
+  // attach listeners
+document.querySelectorAll('.chat-btn').forEach(btn=>{
+  btn.addEventListener('click', (e)=>{
+    activeFriend = e.target.getAttribute('data-friend');
+    activeChat.textContent = `Chat with ${activeFriend}`;
+    messageInput.disabled = false;
+    sendBtn.disabled = false;
+    loadChat(activeFriend);
+    showChatView(); // Add this line to show chat on mobile
   });
+});
   document.querySelectorAll('.remove-btn').forEach(btn=>{
     btn.addEventListener('click', (e)=>{
       const friend = e.target.getAttribute('data-friend');
@@ -203,6 +205,37 @@ socket.on('last-seen', (data) => {
 });
 
 // ACTIONS
+
+// Mobile detection function
+function isMobile() {
+  return window.innerWidth <= 768;
+}
+
+// Mobile view management functions
+function showChatView() {
+  if (isMobile()) {
+    document.getElementById('friends-section').style.display = 'none';
+    document.getElementById('chat-container').classList.add('active');
+    document.getElementById('back-to-friends').style.display = 'flex';
+  }
+}
+
+function showFriendsView() {
+  if (isMobile()) {
+    document.getElementById('friends-section').style.display = 'block';
+    document.getElementById('chat-container').classList.remove('active');
+    document.getElementById('back-to-friends').style.display = 'none';
+    activeFriend = null;
+    activeChat.textContent = 'Select a friend to chat';
+    messageInput.disabled = true;
+    sendBtn.disabled = true;
+    messagesContainer.innerHTML = '';
+  }
+}
+
+
+
+
 function login(){
   const username = usernameInput.value.trim();
   const password = passwordInput.value;
@@ -245,7 +278,13 @@ function loadChat(friend){
   socket.emit('get-chat-history', { username: currentUser.username, withUser: friend });
   // request last seen for friend
   socket.emit('get-last-seen', { username: friend });
+  
+  // Show chat view on mobile
+  if (isMobile()) {
+    showChatView();
+  }
 }
+
 function sendMessage(){
   const text = messageInput.value.trim();
   if (!text || !activeFriend) return;
@@ -433,5 +472,69 @@ socket.on('new-request', (data) => {
   if (data && data.from) {
     // re-fetch requests list
     socket.emit('get-requests', { username: currentUser.username });
+  }
+});
+
+// Add to your existing JavaScript
+
+// Mobile view management
+function isMobile() {
+  return window.innerWidth <= 768;
+}
+
+function showChatView() {
+  if (isMobile()) {
+    document.getElementById('friends-section').style.display = 'none';
+    document.getElementById('chat-container').classList.add('active');
+    document.getElementById('back-to-friends').style.display = 'inline-block';
+  }
+}
+
+function showFriendsView() {
+  if (isMobile()) {
+    document.getElementById('friends-section').style.display = 'block';
+    document.getElementById('chat-container').classList.remove('active');
+    document.getElementById('back-to-friends').style.display = 'none';
+    activeFriend = null;
+    activeChat.textContent = 'Select a friend to chat';
+    messageInput.disabled = true;
+    sendBtn.disabled = true;
+    messagesContainer.innerHTML = '';
+  }
+}
+
+// Update the chat button event listener
+document.querySelectorAll('.chat-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    activeFriend = e.target.getAttribute('data-friend');
+    activeChat.textContent = `Chat with ${activeFriend}`;
+    messageInput.disabled = false;
+    sendBtn.disabled = false;
+    loadChat(activeFriend);
+    showChatView(); // Add this line
+  });
+});
+
+// Back button event listener
+document.getElementById('back-to-friends').addEventListener('click', function() {
+  showFriendsView();
+  
+  // Add a subtle animation effect when going back
+  this.style.transform = "scale(0.9)";
+  setTimeout(() => {
+    this.style.transform = "";
+  }, 100);
+});
+
+
+
+
+
+// Handle window resize to maintain proper state
+window.addEventListener('resize', function() {
+  if (!isMobile() && document.getElementById('chat-container').classList.contains('active')) {
+    document.getElementById('friends-section').style.display = 'block';
+    document.getElementById('chat-container').classList.remove('active');
+    document.getElementById('back-to-friends').style.display = 'none';
   }
 });
