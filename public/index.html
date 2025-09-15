@@ -629,50 +629,115 @@
 }
 
 /* Fix for mobile chat input visibility */
-@media (max-width: 768px) {
-  #chat-container.active {
+/* Mobile Responsiveness Enhancements */
+@media (max-width: 768px){
+  #main-content {
+    flex-direction: column;
+    height: auto;
+    min-height: calc(100vh - 72px);
+  }
+  
+  #friends-section {
+    width: 100%;
+    height: auto;
+    order: 1;
+    display: block;
+  }
+  
+  #chat-container {
+    order: 2;
+    height: 0;
+    overflow: hidden;
+    transition: height 0.3s ease;
     display: flex;
     flex-direction: column;
-    height: 100vh !important;
+  }
+  
+  #chat-container.active {
+    height: 100vh;
+    width: 100%;
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    z-index: 1000;
+    z-index: 100;
     background: linear-gradient(135deg, #0a0a1a 0%, #0f0f1f 25%, #141428 50%, #0c0c1f 75%, #070716 100%);
+  }
+  
+  /* Ensure proper layout for mobile chat */
+  #chat-container.active {
+    display: flex;
+    flex-direction: column;
   }
   
   #messages {
     flex: 1;
     overflow-y: auto;
-    padding-bottom: 10px;
+    padding: 16px;
+    padding-bottom: 70px; /* Space for input */
   }
   
   #message-input {
-    position: sticky;
+    position: fixed;
     bottom: 0;
+    left: 0;
+    right: 0;
     background: rgba(15, 20, 40, 0.95);
     padding: 12px;
     border-top: 1px solid rgba(0, 200, 255, 0.2);
-    z-index: 1001;
+    z-index: 101;
+    display: flex;
+    gap: 8px;
   }
   
-  /* Ensure reply preview is visible */
-  .reply-preview {
-    position: sticky;
-    top: 0;
-    z-index: 1002;
-    background: rgba(0, 50, 100, 0.9);
+  #message {
+    flex: 1;
+  }
+  
+  /* Adjust for mobile safe areas */
+  @supports(padding: max(0px)) {
+    #message-input {
+      padding-left: max(12px, env(safe-area-inset-left));
+      padding-right: max(12px, env(safe-area-inset-right));
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+    }
+  }
+  
+  .back-button {
+    display: inline-block;
+    margin-right: 10px;
+    cursor: pointer;
+    font-size: 24px;
+    font-weight: bold;
+    color: #00e6ff;
+    text-shadow: 0 0 8px rgba(0, 230, 255, 0.7);
+    padding: 5px 10px;
+  }
+  
+  /* Hide chat elements when not active */
+  #chat-container:not(.active) {
+    display: none;
   }
   
   /* Adjust header for mobile */
   #chat-header {
     position: sticky;
     top: 0;
-    z-index: 1002;
+    z-index: 102;
     background: rgba(15, 20, 40, 0.95);
     padding: 12px;
     border-bottom: 1px solid rgba(0, 200, 255, 0.2);
+  }
+  
+  /* Ensure reply preview is visible */
+  .reply-preview {
+    position: sticky;
+    bottom: 70px; /* Position above input */
+    z-index: 100;
+    background: rgba(0, 50, 100, 0.9);
+    margin: 0;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
   }
 }
   </style>

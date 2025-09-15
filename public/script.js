@@ -218,10 +218,15 @@ function showChatView() {
     document.getElementById('chat-container').classList.add('active');
     document.getElementById('back-to-friends').style.display = 'flex';
     
-    // Force a reflow to ensure proper rendering
+    // Force a reflow and focus on input
     setTimeout(() => {
       messagesContainer.scrollTop = messagesContainer.scrollHeight;
       messageInput.focus();
+      
+      // Add a slight delay to ensure rendering is complete
+      setTimeout(() => {
+        messageInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 50);
     }, 100);
   }
 }
@@ -519,3 +524,9 @@ window.addEventListener('resize', function() {
     document.getElementById('back-to-friends').style.display = 'none';
   }
 });
+
+// Enhanced mobile detection
+function isMobile() {
+  return window.innerWidth <= 768 || 
+         /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
