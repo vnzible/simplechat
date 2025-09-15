@@ -217,9 +217,14 @@ function showChatView() {
     document.getElementById('friends-section').style.display = 'none';
     document.getElementById('chat-container').classList.add('active');
     document.getElementById('back-to-friends').style.display = 'flex';
+    
+    // Force a reflow to ensure proper rendering
+    setTimeout(() => {
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      messageInput.focus();
+    }, 100);
   }
 }
-
 function showFriendsView() {
   if (isMobile()) {
     document.getElementById('friends-section').style.display = 'block';
@@ -477,31 +482,7 @@ socket.on('new-request', (data) => {
 
 // Add to your existing JavaScript
 
-// Mobile view management
-function isMobile() {
-  return window.innerWidth <= 768;
-}
 
-function showChatView() {
-  if (isMobile()) {
-    document.getElementById('friends-section').style.display = 'none';
-    document.getElementById('chat-container').classList.add('active');
-    document.getElementById('back-to-friends').style.display = 'inline-block';
-  }
-}
-
-function showFriendsView() {
-  if (isMobile()) {
-    document.getElementById('friends-section').style.display = 'block';
-    document.getElementById('chat-container').classList.remove('active');
-    document.getElementById('back-to-friends').style.display = 'none';
-    activeFriend = null;
-    activeChat.textContent = 'Select a friend to chat';
-    messageInput.disabled = true;
-    sendBtn.disabled = true;
-    messagesContainer.innerHTML = '';
-  }
-}
 
 // Update the chat button event listener
 document.querySelectorAll('.chat-btn').forEach(btn => {
