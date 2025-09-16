@@ -743,7 +743,7 @@
 }
 
 /* Mobile Responsiveness Enhancements */
-@media (max-width: 768px) {
+@media (max-width: 768px){
   #main-content {
     flex-direction: column;
     height: auto;
@@ -832,6 +832,11 @@
     align-items: center;
     justify-content: space-between;
     border-bottom: 1px solid rgba(0, 200, 255, 0.2);
+    display: none; /* Hidden by default */
+  }
+  
+  #reply-preview:not(.hidden) {
+    display: flex; /* Show only when not hidden */
   }
   
   .back-button {
@@ -928,11 +933,15 @@
 
           <div id="messages"></div>
 
-          <div id="reply-preview" class="reply-preview hidden">
-            <div class="reply-meta"><strong id="reply-who"></strong></div>
-            <div id="reply-text" class="reply-text"></div>
-            <button id="cancel-reply" class="btn small">x</button>
-          </div>
+         <div id="reply-preview" class="reply-preview hidden">
+  <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
+    <div style="flex: 1;">
+      <div class="reply-meta"><strong id="reply-who"></strong></div>
+      <div id="reply-text" class="reply-text"></div>
+    </div>
+    <button id="cancel-reply" class="btn small">✕</button>
+  </div>
+</div>
 
           <div id="message-input">
             <input type="text" id="message" placeholder="Type a message..." disabled>

@@ -302,11 +302,12 @@ function addFriend() {
   friendUsernameInput.value = '';
 }
 
+// Update the loadChat function to hide reply preview when changing chats
 function loadChat(friend) {
   activeFriend = friend;
   messagesContainer.innerHTML = '';
   replyToMessageId = null;
-  hideReplyPreview();
+  hideReplyPreview(); // Add this line
   socket.emit('get-chat-history', { username: currentUser.username, withUser: friend });
   socket.emit('get-last-seen', { username: friend });
   
@@ -441,6 +442,7 @@ function addMessageToUI(msg) {
 }
 
 // Reply functionality
+// Update the startReply function
 function startReply(msg) {
   replyToMessageId = msg._id || null;
   replyWho.textContent = msg.from;
@@ -453,16 +455,23 @@ function startReply(msg) {
   }
 }
 
+// Update the cancelReply function
 function cancelReply() {
   replyToMessageId = null;
   hideReplyPreview();
 }
 
+// Update the hideReplyPreview function
 function hideReplyPreview() {
   replyPreview.classList.add('hidden');
   replyWho.textContent = '';
   replyText.textContent = '';
 }
+
+// Ensure reply preview is hidden on page load
+document.addEventListener('DOMContentLoaded', function() {
+  hideReplyPreview();
+});
 
 // Typing indicators
 function onTypingInput() {
