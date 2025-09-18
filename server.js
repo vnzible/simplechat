@@ -20,8 +20,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 // MongoDB connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://chatuser:chat123@sc.xoed8vb.mongodb.net/?retryWrites=true&w=majority&appName=sc';
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-.then(()=> console.log('MongoDB connected'))
-.catch(err=> console.error('MongoDB error', err));
+.then(() => console.log('MongoDB connected'))
+.catch(err => console.error('MongoDB error', err));
 
 // Schemas
 const userSchema = new mongoose.Schema({
@@ -46,9 +46,30 @@ const messageSchema = new mongoose.Schema({
   replyTo: { type: mongoose.Schema.Types.ObjectId, ref: 'Message', default: null }
 });
 
+// Group Schema
+const groupSchema = new mongoose.Schema({
+  name: String,
+  members: [String],
+  createdBy: String,
+  createdAt: { type: Date, default: Date.now }
+});
+
+// Group Message Schema
+const groupMessageSchema = new mongoose.Schema({
+  groupId: mongoose.Schema.Types.ObjectId,
+  from: String,
+  text: String,
+  timestamp: { type: Date, default: Date.now },
+  isRead: { type: Boolean, default: false },
+  deleted: { type: Boolean, default: false },
+  replyTo: { type: mongoose.Schema.Types.ObjectId, ref: 'GroupMessage', default: null }
+});
+
 const User = mongoose.model('User', userSchema);
 const FriendRequest = mongoose.model('FriendRequest', friendRequestSchema);
 const Message = mongoose.model('Message', messageSchema);
+const Group = mongoose.model('Group', groupSchema);
+const GroupMessage = mongoose.model('GroupMessage', groupMessageSchema);
 
 // In-memory connected user map: username -> socketId
 const connectedUsers = new Map();
@@ -104,7 +125,7 @@ io.on('connection', (socket) => {
       socket.emit('auth-response', { success: true, user: { username } });
       // send friends list and requests
       sendFriendsListTo(username, socket.id);
-      const requests = await FriendRequest.find({ to: username, status: 'pending' }).then(r=> r.map(x=> x.from));
+      const requests = await FriendRequest.find({ to: username, status: 'pending' }).then(r => r.map(x => x.from));
       socket.emit('requests-list', requests);
     } catch (err) {
       console.error(err);
@@ -134,7 +155,7 @@ io.on('connection', (socket) => {
       io.emit('user-online', { username });
       socket.emit('auth-response', { success: true, user: { username } });
       sendFriendsListTo(username, socket.id);
-      const requests = await FriendRequest.find({ to: username, status: 'pending' }).then(r=> r.map(x=> x.from));
+      const requests = await FriendRequest.find({ to: username, status: 'pending' }).then(r => r.map(x => x.from));
       socket.emit('requests-list', requests);
     } catch (err) {
       console.error(err);
@@ -154,7 +175,7 @@ io.on('connection', (socket) => {
       io.emit('user-online', { username });
       socket.emit('auth-response', { success: true, user: { username } });
       sendFriendsListTo(username, socket.id);
-      const requests = await FriendRequest.find({ to: username, status: 'pending' }).then(r=> r.map(x=> x.from));
+      const requests = await FriendRequest.find({ to: username, status: 'pending' }).then(r => r.map(x => x.from));
       socket.emit('requests-list', requests);
     } catch (err) {
       console.error(err);
@@ -329,6 +350,350 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Group functionality
+  socket.on('create-group', async (data) => {
+    try {
+      const { name, members, createdBy } = data;
+      
+      // Add creator to members
+      if (!members.includes(createdBy)) {
+        members.push(createdBy);
+      }
+      
+      const group = new Group({ name, members, createdBy });
+      await group.save();
+      
+      // Notify all members
+      members.forEach(member => {
+        const memberSocket = connectedUsers.get(member);
+        if (memberSocket) {
+          io.to(memberSocket).emit('group-created', { 
+            success: true, 
+            group: { _id: group._id, name: group.name, members: group.members } 
+          });
+          // Refresh groups list for all members
+          io.to(memberSocket).emit('get-groups', { username: member });
+        }
+      });
+    } catch (err) {
+      console.error(err);
+      socket.emit('group-created', { success: false, message: 'Failed to create group' });
+    }
+  });
+
+  socket.on('get-groups', async (data) => {
+    try {
+      const { username } = data;
+      const groups = await Group.find({ members: username });
+      
+      // Add unread count for each group
+      const groupsWithUnread = await Promise.all(groups.map(async (group) => {
+        const unreadCount = await GroupMessage.countDocuments({ 
+          groupId: group._id, 
+          from: { $ne: username },
+          isRead: false 
+        });
+        return {
+          _id: group._id,
+          name: group.name,
+          members: group.members,
+          unread: unreadCount
+        };
+      }));
+      
+      socket.emit('groups-list', groupsWithUnread);
+    } catch (err) {
+      console.error(err);
+    }
+  });
+
+  socket.on('get-group-info', async (data) => {
+    try {
+      const { groupId } = data;
+      const group = await Group.findById(groupId);
+      socket.emit('group-info', { group });
+    } catch (err) {
+      console.error(err);
+    }
+  });
+
+  socket.on('add-group-member', async (data) => {
+    try {
+      const { groupId, username, addedBy } = data;
+      
+      // Check if user exists
+      const userExists = await User.findOne({ username });
+      if (!userExists) {
+        socket.emit('group-member-added', { success: false, message: 'User not found' });
+        return;
+      }
+      
+      // Check if user is already in group
+      const group = await Group.findById(groupId);
+      if (group.members.includes(username)) {
+        socket.emit('group-member-added', { success: false, message: 'User already in group' });
+        return;
+      }
+      
+      // Check if requester is group admin
+      if (group.createdBy !== addedBy) {
+        socket.emit('group-member-added', { success: false, message: 'Only group admin can add members' });
+        return;
+      }
+      
+      // Add user to group
+      group.members.push(username);
+      await group.save();
+      
+      // Notify all group members
+      group.members.forEach(member => {
+        const memberSocket = connectedUsers.get(member);
+        if (memberSocket) {
+          io.to(memberSocket).emit('group-member-added', { 
+            success: true, 
+            groupId,
+            username 
+          });
+          // Refresh groups list for all members
+          io.to(memberSocket).emit('get-groups', { username: member });
+        }
+      });
+    } catch (err) {
+      console.error(err);
+      socket.emit('group-member-added', { success: false, message: 'Failed to add member' });
+    }
+  });
+
+  socket.on('remove-group-member', async (data) => {
+    try {
+      const { groupId, member, removedBy } = data;
+      
+      const group = await Group.findById(groupId);
+      
+      // Check if requester is group admin
+      if (group.createdBy !== removedBy) {
+        socket.emit('group-member-removed', { success: false, message: 'Only group admin can remove members' });
+        return;
+      }
+      
+      // Cannot remove admin
+      if (member === group.createdBy) {
+        socket.emit('group-member-removed', { success: false, message: 'Cannot remove group admin' });
+        return;
+      }
+      
+      // Remove user from group
+      group.members = group.members.filter(m => m !== member);
+      await group.save();
+      
+      // Notify all group members
+      group.members.forEach(member => {
+        const memberSocket = connectedUsers.get(member);
+        if (memberSocket) {
+          io.to(memberSocket).emit('group-member-removed', { 
+            success: true, 
+            groupId,
+            removedUser: member 
+          });
+          // Refresh groups list for all members
+          io.to(memberSocket).emit('get-groups', { username: member });
+        }
+      });
+      
+      // Notify removed user
+      const removedUserSocket = connectedUsers.get(member);
+      if (removedUserSocket) {
+        io.to(removedUserSocket).emit('group-member-removed', { 
+          success: true, 
+          groupId,
+          removedUser: member 
+        });
+        // Refresh groups list for removed user
+        io.to(removedUserSocket).emit('get-groups', { username: member });
+      }
+    } catch (err) {
+      console.error(err);
+      socket.emit('group-member-removed', { success: false, message: 'Failed to remove member' });
+    }
+  });
+
+  socket.on('leave-group', async (data) => {
+    try {
+      const { groupId, username } = data;
+      
+      const group = await Group.findById(groupId);
+      
+      // Cannot leave if you're the admin (or implement admin transfer)
+      if (group.createdBy === username) {
+        socket.emit('action-failed', { message: 'Group admin cannot leave group. Transfer admin rights first or delete the group.' });
+        return;
+      }
+      
+      // Remove user from group
+      group.members = group.members.filter(m => m !== username);
+      await group.save();
+      
+      // Notify all group members
+      group.members.forEach(member => {
+        const memberSocket = connectedUsers.get(member);
+        if (memberSocket) {
+          io.to(memberSocket).emit('group-member-removed', { 
+            success: true, 
+            groupId,
+            removedUser: username 
+          });
+          // Refresh groups list for all members
+          io.to(memberSocket).emit('get-groups', { username: member });
+        }
+      });
+      
+      // Notify user who left
+      socket.emit('group-member-removed', { 
+        success: true, 
+        groupId,
+        removedUser: username 
+      });
+      // Refresh groups list for user who left
+      socket.emit('get-groups', { username });
+    } catch (err) {
+      console.error(err);
+      socket.emit('action-failed', { message: 'Failed to leave group' });
+    }
+  });
+
+  socket.on('send-group-message', async (data) => {
+    try {
+      const { from, groupId, message, replyTo } = data;
+      
+      const newMsg = new GroupMessage({
+        groupId,
+        from,
+        text: message,
+        replyTo: replyTo || null
+      });
+      await newMsg.save();
+      
+      // Get group members
+      const group = await Group.findById(groupId);
+      
+      // Send to all group members who are online
+      group.members.forEach(member => {
+        const memberSocket = connectedUsers.get(member);
+        if (memberSocket) {
+          io.to(memberSocket).emit('new-message', {
+            _id: newMsg._id,
+            from: newMsg.from,
+            groupId: newMsg.groupId,
+            text: newMsg.text,
+            timestamp: newMsg.timestamp,
+            isRead: member === from, // Message is read for sender
+            deleted: newMsg.deleted,
+            replyTo: newMsg.replyTo,
+            type: 'group'
+          });
+          
+          // Update unread counts for group lists
+          io.to(memberSocket).emit('get-groups', { username: member });
+        }
+      });
+    } catch (err) {
+      console.error('send-group-message error', err);
+    }
+  });
+
+  socket.on('get-group-chat-history', async (data) => {
+    try {
+      const { groupId } = data;
+      
+      const messages = await GroupMessage.find({ groupId })
+        .sort({ timestamp: 1 })
+        .lean();
+      
+      const group = await Group.findById(groupId);
+      
+      // Mark messages as read for the requesting user
+      await GroupMessage.updateMany(
+        { groupId, from: { $ne: data.username }, isRead: false },
+        { isRead: true }
+      );
+      
+      socket.emit('group-chat-history', { messages, group });
+      
+      // Update unread counts for all group members
+      group.members.forEach(member => {
+        const memberSocket = connectedUsers.get(member);
+        if (memberSocket) {
+          io.to(memberSocket).emit('get-groups', { username: member });
+        }
+      });
+    } catch (err) {
+      console.error('get-group-chat-history error', err);
+    }
+  });
+
+  // Group typing indicator
+  socket.on('group-typing', (data) => {
+    const { from, groupId } = data;
+    
+    // Get group members
+    Group.findById(groupId).then(group => {
+      group.members.forEach(member => {
+        if (member !== from) { // Don't send to self
+          const memberSocket = connectedUsers.get(member);
+          if (memberSocket) {
+            io.to(memberSocket).emit('group-typing', { from, groupId });
+          }
+        }
+      });
+    });
+  });
+
+  socket.on('stop-group-typing', (data) => {
+    const { from, groupId } = data;
+    
+    // Get group members
+    Group.findById(groupId).then(group => {
+      group.members.forEach(member => {
+        if (member !== from) { // Don't send to self
+          const memberSocket = connectedUsers.get(member);
+          if (memberSocket) {
+            io.to(memberSocket).emit('stop-group-typing', { from, groupId });
+          }
+        }
+      });
+    });
+  });
+
+  // Delete group message
+  socket.on('delete-group-message', async (data) => {
+    try {
+      const { messageId, groupId, requestor } = data;
+      
+      const msg = await GroupMessage.findById(messageId);
+      if (!msg) return;
+      
+      // Only allow author to delete
+      if (msg.from !== requestor) {
+        socket.emit('action-failed', { message: 'Not authorized to delete' });
+        return;
+      }
+      
+      msg.deleted = true;
+      await msg.save();
+      
+      // Notify all group members
+      const group = await Group.findById(groupId);
+      group.members.forEach(member => {
+        const memberSocket = connectedUsers.get(member);
+        if (memberSocket) {
+          io.to(memberSocket).emit('message-deleted', { messageId });
+        }
+      });
+    } catch (err) {
+      console.error('delete-group-message error', err);
+    }
+  });
+
   // set message read explicitly (optional)
   socket.on('mark-as-read', async (data) => {
     try {
@@ -412,5 +777,6 @@ io.on('connection', (socket) => {
   });
 
 });
+
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, ()=> console.log('Server running on', PORT));
+server.listen(PORT, () => console.log('Server running on', PORT));

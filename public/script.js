@@ -1,14 +1,16 @@
-// Ultra Chat Application - Enhanced Version
-// More organized, efficient, and with improved UI interactions
+// Ultra Chat Application with Group Functionality
+// Enhanced version with group chat features
 
 class UltraChat {
   constructor() {
     this.socket = io();
     this.currentUser = null;
     this.activeFriend = null;
+    this.activeGroup = null;
     this.replyToMessageId = null;
     this.typingTimeout = null;
     this.isTypingEmitted = false;
+    this.friends = [];
     
     // Initialize the app
     this.init();
@@ -42,7 +44,9 @@ class UltraChat {
     this.logoutBtn = document.getElementById('logout-btn');
     this.friendUsernameInput = document.getElementById('friend-username');
     this.addFriendBtn = document.getElementById('add-friend-btn');
+    this.createGroupBtn = document.getElementById('create-group-btn');
     this.friendsListEl = document.getElementById('friends-list');
+    this.groupsListEl = document.getElementById('groups-list');
     this.friendRequests = document.getElementById('friend-requests');
     this.messagesContainer = document.getElementById('messages');
     this.messageInput = document.getElementById('message');
@@ -55,6 +59,19 @@ class UltraChat {
     this.replyText = document.getElementById('reply-text');
     this.cancelReplyBtn = document.getElementById('cancel-reply');
     this.backToFriendsBtn = document.getElementById('back-to-friends');
+    this.groupInfoBtn = document.getElementById('group-info-btn');
+    this.groupInfoPanel = document.getElementById('group-info-panel');
+    this.groupMembersList = document.getElementById('group-members-list');
+    this.addMemberInput = document.getElementById('add-member-input');
+    this.addMemberBtn = document.getElementById('add-member-btn');
+    
+    // Modal elements
+    this.createGroupModal = document.getElementById('create-group-modal');
+    this.groupNameInput = document.getElementById('group-name-input');
+    this.friendsCheckboxContainer = document.getElementById('friends-checkbox-container');
+    this.closeModalBtn = document.querySelector('.close-modal');
+    this.cancelCreateGroupBtn = document.getElementById('cancel-create-group');
+    this.confirmCreateGroupBtn = document.getElementById('confirm-create-group');
   }
   
   initParticles() {
@@ -102,6 +119,7 @@ class UltraChat {
     
     // Friend management events
     this.addFriendBtn.addEventListener('click', () => this.addFriend());
+    this.createGroupBtn.addEventListener('click', () => this.showCreateGroupModal());
     
     // Message events
     this.sendBtn.addEventListener('click', () => this.sendMessage());
@@ -111,8 +129,17 @@ class UltraChat {
       if (e.key === 'Enter') this.sendMessage();
     });
     
+    // Group events
+    this.groupInfoBtn.addEventListener('click', () => this.toggleGroupInfo());
+    this.addMemberBtn.addEventListener('click', () => this.addGroupMember());
+    
     // Navigation events
     this.backToFriendsBtn.addEventListener('click', () => this.showFriendsView());
+    
+    // Modal events
+    this.closeModalBtn.addEventListener('click', () => this.hideCreateGroupModal());
+    this.cancelCreateGroupBtn.addEventListener('click', () => this.hideCreateGroupModal());
+    this.confirmCreateGroupBtn.addEventListener('click', () => this.createGroup());
     
     // Socket events
     this.bindSocketEvents();
@@ -122,18 +149,29 @@ class UltraChat {
     this.socket.on('connect', () => console.log('Connected to server'));
     
     this.socket.on('auth-response', (data) => this.handleAuthResponse(data));
-    this.socket.on('friends-list', (friends) => this.renderFriendsList(friends));
+    this.socket.on('friends-list', (friends) => {
+      this.friends = friends;
+      this.renderFriendsList(friends);
+    });
+    this.socket.on('groups-list', (groups) => this.renderGroupsList(groups));
     this.socket.on('requests-list', (requests) => this.renderFriendRequests(requests));
     this.socket.on('new-message', (msg) => this.handleNewMessage(msg));
     this.socket.on('chat-history', (messages) => this.renderChatHistory(messages));
+    this.socket.on('group-chat-history', (data) => this.renderGroupChatHistory(data));
     this.socket.on('message-deleted', (data) => this.handleMessageDeleted(data));
     this.socket.on('typing', (data) => this.showTypingIndicator(data));
+    this.socket.on('group-typing', (data) => this.showGroupTypingIndicator(data));
     this.socket.on('stop-typing', (data) => this.hideTypingIndicator(data));
+    this.socket.on('stop-group-typing', (data) => this.hideGroupTypingIndicator(data));
     this.socket.on('user-online', (data) => this.handleUserOnline(data));
     this.socket.on('user-offline', (data) => this.handleUserOffline(data));
     this.socket.on('last-seen', (data) => this.updateLastSeen(data));
     this.socket.on('new-request', (data) => this.handleNewRequest(data));
     this.socket.on('action-failed', (data) => this.handleActionFailed(data));
+    this.socket.on('group-created', (data) => this.handleGroupCreated(data));
+    this.socket.on('group-info', (data) => this.handleGroupInfo(data));
+    this.socket.on('group-member-added', (data) => this.handleGroupMemberAdded(data));
+    this.socket.on('group-member-removed', (data) => this.handleGroupMemberRemoved(data));
   }
   
   // Authentication methods
@@ -177,8 +215,9 @@ class UltraChat {
       this.chatSection.classList.add('active');
       this.saveUserSession(this.currentUser.username);
       
-      // Request friends & requests
+      // Request friends, groups & requests
       this.socket.emit('get-friends', { username: this.currentUser.username });
+      this.socket.emit('get-groups', { username: this.currentUser.username });
       this.socket.emit('get-requests', { username: this.currentUser.username });
     } else {
       alert(data.message || 'Auth error');
@@ -190,6 +229,7 @@ class UltraChat {
     this.clearUserSession();
     this.currentUser = null;
     this.activeFriend = null;
+    this.activeGroup = null;
     this.authSection.classList.add('active');
     this.chatSection.classList.remove('active');
     this.usernameInput.value = '';
@@ -239,6 +279,31 @@ class UltraChat {
     this.attachFriendEvents();
   }
   
+  renderGroupsList(groups) {
+    this.groupsListEl.innerHTML = '';
+    
+    groups.forEach(g => {
+      const el = document.createElement('div');
+      el.className = 'group-item';
+      el.innerHTML = `
+        <div class="group-left">
+          <span class="group-name">${g.name}</span>
+          <span class="group-members-count">${g.members.length} members</span>
+          ${g.unread > 0 ? `<span class="unread-badge">${g.unread}</span>` : ''}
+        </div>
+        <div class="group-actions">
+          <button class="group-chat-btn btn small" data-group="${g._id}">Chat</button>
+          <button class="leave-group-btn btn small" data-group="${g._id}">Leave</button>
+        </div>
+      `;
+      
+      this.groupsListEl.appendChild(el);
+    });
+    
+    // Attach event listeners to group items
+    this.attachGroupEvents();
+  }
+  
   attachFriendEvents() {
     // Chat buttons
     document.querySelectorAll('.chat-btn').forEach(btn => {
@@ -255,6 +320,27 @@ class UltraChat {
         this.socket.emit('remove-friend', { 
           username: this.currentUser.username, 
           friendUsername: friend 
+        });
+      });
+    });
+  }
+  
+  attachGroupEvents() {
+    // Group chat buttons
+    document.querySelectorAll('.group-chat-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const groupId = e.target.getAttribute('data-group');
+        this.startChatWithGroup(groupId);
+      });
+    });
+    
+    // Leave group buttons
+    document.querySelectorAll('.leave-group-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const groupId = e.target.getAttribute('data-group');
+        this.socket.emit('leave-group', { 
+          username: this.currentUser.username, 
+          groupId 
         });
       });
     });
@@ -305,12 +391,186 @@ class UltraChat {
     });
   }
   
+  // Group methods
+  showCreateGroupModal() {
+    // Populate friends checkboxes
+    this.friendsCheckboxContainer.innerHTML = '';
+    
+    this.friends.forEach(friend => {
+      const checkboxDiv = document.createElement('div');
+      checkboxDiv.className = 'friend-checkbox';
+      checkboxDiv.innerHTML = `
+        <input type="checkbox" id="friend-${friend.username}" value="${friend.username}">
+        <label for="friend-${friend.username}">${friend.username}</label>
+      `;
+      this.friendsCheckboxContainer.appendChild(checkboxDiv);
+    });
+    
+    this.createGroupModal.classList.add('active');
+  }
+  
+  hideCreateGroupModal() {
+    this.createGroupModal.classList.remove('active');
+    this.groupNameInput.value = '';
+  }
+  
+  createGroup() {
+    const groupName = this.groupNameInput.value.trim();
+    if (!groupName) {
+      alert('Please enter a group name');
+      return;
+    }
+    
+    const selectedFriends = [];
+    document.querySelectorAll('#friends-checkbox-container input:checked').forEach(checkbox => {
+      selectedFriends.push(checkbox.value);
+    });
+    
+    if (selectedFriends.length === 0) {
+      alert('Please select at least one friend');
+      return;
+    }
+    
+    this.socket.emit('create-group', {
+      name: groupName,
+      members: selectedFriends,
+      createdBy: this.currentUser.username
+    });
+    
+    this.hideCreateGroupModal();
+  }
+  
+  handleGroupCreated(data) {
+    if (data.success) {
+      this.socket.emit('get-groups', { username: this.currentUser.username });
+    } else {
+      alert(data.message || 'Failed to create group');
+    }
+  }
+  
+  startChatWithGroup(groupId) {
+    this.activeGroup = groupId;
+    this.activeFriend = null;
+    this.activeChat.textContent = `Group: ${groupId}`; // Will be updated with actual group name
+    this.messageInput.disabled = false;
+    this.sendBtn.disabled = false;
+    this.groupInfoBtn.style.display = 'block';
+    this.groupInfoPanel.classList.remove('active');
+    
+    this.loadGroupChat(groupId);
+    this.showChatView();
+    
+    // Get group info
+    this.socket.emit('get-group-info', { groupId });
+  }
+  
+  loadGroupChat(groupId) {
+    this.activeGroup = groupId;
+    this.messagesContainer.innerHTML = '';
+    this.replyToMessageId = null;
+    this.hideReplyPreview();
+    
+    this.socket.emit('get-group-chat-history', { 
+      groupId: groupId 
+    });
+    
+    if (this.isMobile()) {
+      this.showChatView();
+    }
+  }
+  
+  renderGroupChatHistory(data) {
+    this.messagesContainer.innerHTML = '';
+    data.messages.forEach(m => this.addMessageToUI(m));
+    this.scrollToBottom();
+    
+    // Update active chat name
+    if (data.group) {
+      this.activeChat.textContent = `Group: ${data.group.name}`;
+    }
+  }
+  
+  toggleGroupInfo() {
+    this.groupInfoPanel.classList.toggle('active');
+    if (this.groupInfoPanel.classList.contains('active')) {
+      this.socket.emit('get-group-info', { groupId: this.activeGroup });
+    }
+  }
+  
+  handleGroupInfo(data) {
+    if (data.group) {
+      this.groupMembersList.innerHTML = '';
+      
+      data.group.members.forEach(member => {
+        const memberEl = document.createElement('div');
+        memberEl.className = 'group-member';
+        memberEl.innerHTML = `
+          <div>${member} ${member === data.group.createdBy ? '<span class="admin-badge">Admin</span>' : ''}</div>
+          ${member !== data.group.createdBy && this.currentUser.username === data.group.createdBy ? 
+            `<button class="remove-member-btn btn danger small" data-member="${member}">Remove</button>` : ''}
+        `;
+        
+        this.groupMembersList.appendChild(memberEl);
+      });
+      
+      // Add event listeners to remove buttons
+      document.querySelectorAll('.remove-member-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const member = e.target.getAttribute('data-member');
+          this.socket.emit('remove-group-member', {
+            groupId: this.activeGroup,
+            member: member,
+            removedBy: this.currentUser.username
+          });
+        });
+      });
+    }
+  }
+  
+  addGroupMember() {
+    const username = this.addMemberInput.value.trim();
+    if (!username) return;
+    
+    this.socket.emit('add-group-member', {
+      groupId: this.activeGroup,
+      username: username,
+      addedBy: this.currentUser.username
+    });
+    
+    this.addMemberInput.value = '';
+  }
+  
+  handleGroupMemberAdded(data) {
+    if (data.success) {
+      this.socket.emit('get-group-info', { groupId: this.activeGroup });
+    } else {
+      alert(data.message || 'Failed to add member');
+    }
+  }
+  
+  handleGroupMemberRemoved(data) {
+    if (data.success) {
+      this.socket.emit('get-group-info', { groupId: this.activeGroup });
+      
+      // If current user was removed, go back to friends view
+      if (data.removedUser === this.currentUser.username) {
+        this.showFriendsView();
+        this.socket.emit('get-groups', { username: this.currentUser.username });
+      }
+    } else {
+      alert(data.message || 'Failed to remove member');
+    }
+  }
+  
   // Chat methods
   startChatWithFriend(friend) {
     this.activeFriend = friend;
+    this.activeGroup = null;
     this.activeChat.textContent = `Chat with ${friend}`;
     this.messageInput.disabled = false;
     this.sendBtn.disabled = false;
+    this.groupInfoBtn.style.display = 'none';
+    this.groupInfoPanel.classList.remove('active');
     
     this.loadChat(friend);
     this.showChatView();
@@ -336,14 +596,25 @@ class UltraChat {
   
   sendMessage() {
     const text = this.messageInput.value.trim();
-    if (!text || !this.activeFriend) return;
+    if (!text) return;
     
-    this.socket.emit('send-message', { 
-      from: this.currentUser.username, 
-      to: this.activeFriend, 
-      message: text, 
-      replyTo: this.replyToMessageId 
-    });
+    if (this.activeFriend) {
+      // Private message
+      this.socket.emit('send-message', { 
+        from: this.currentUser.username, 
+        to: this.activeFriend, 
+        message: text, 
+        replyTo: this.replyToMessageId 
+      });
+    } else if (this.activeGroup) {
+      // Group message
+      this.socket.emit('send-group-message', { 
+        from: this.currentUser.username, 
+        groupId: this.activeGroup, 
+        message: text, 
+        replyTo: this.replyToMessageId 
+      });
+    }
     
     this.messageInput.value = '';
     this.cancelReply();
@@ -351,11 +622,22 @@ class UltraChat {
   }
   
   handleNewMessage(msg) {
-    if ((this.activeFriend && (msg.from === this.activeFriend || msg.to === this.activeFriend)) || 
-        msg.from === this.currentUser.username) {
-      this.addMessageToUI(msg);
+    if (msg.type === 'group') {
+      // Group message
+      if (this.activeGroup && msg.groupId === this.activeGroup) {
+        this.addMessageToUI(msg);
+      } else {
+        // Update groups list to show unread count
+        this.socket.emit('get-groups', { username: this.currentUser.username });
+      }
     } else {
-      this.socket.emit('get-friends', { username: this.currentUser.username });
+      // Private message
+      if ((this.activeFriend && (msg.from === this.activeFriend || msg.to === this.activeFriend)) || 
+          msg.from === this.currentUser.username) {
+        this.addMessageToUI(msg);
+      } else {
+        this.socket.emit('get-friends', { username: this.currentUser.username });
+      }
     }
   }
   
@@ -367,6 +649,7 @@ class UltraChat {
   
   addMessageToUI(msg) {
     const isSent = msg.from === this.currentUser.username;
+    const isGroup = msg.type === 'group';
     const el = document.createElement('div');
     el.className = `message ${isSent ? 'sent' : 'received'} ${msg.deleted ? 'deleted' : ''}`;
     
@@ -391,7 +674,11 @@ class UltraChat {
         </div>`;
     }
 
+    // Show sender name for group messages
+    const senderInfo = isGroup && !isSent ? `<div class="small" style="margin-bottom:4px; opacity:0.8;">${msg.from}</div>` : '';
+
     el.innerHTML = `
+      ${senderInfo}
       ${replySnippet}
       <div class="msg-content">${contentText}</div>
       <div class="meta">${msg.timestamp ? new Date(msg.timestamp).toLocaleString() : ''}</div>
@@ -434,10 +721,18 @@ class UltraChat {
         });
         
         deleteOption.addEventListener('click', () => {
-          this.socket.emit('delete-message', { 
-            messageId: msg._id, 
-            requestor: this.currentUser.username 
-          });
+          if (isGroup) {
+            this.socket.emit('delete-group-message', { 
+              messageId: msg._id, 
+              groupId: this.activeGroup,
+              requestor: this.currentUser.username 
+            });
+          } else {
+            this.socket.emit('delete-message', { 
+              messageId: msg._id, 
+              requestor: this.currentUser.username 
+            });
+          }
           menuOptions.classList.add('hidden');
         });
         
@@ -494,13 +789,20 @@ class UltraChat {
   
   // Typing indicators
   onTypingInput() {
-    if (!this.activeFriend) return;
+    if (!this.activeFriend && !this.activeGroup) return;
     
     if (!this.isTypingEmitted) {
-      this.socket.emit('typing', { 
-        from: this.currentUser.username, 
-        to: this.activeFriend 
-      });
+      if (this.activeFriend) {
+        this.socket.emit('typing', { 
+          from: this.currentUser.username, 
+          to: this.activeFriend 
+        });
+      } else if (this.activeGroup) {
+        this.socket.emit('group-typing', { 
+          from: this.currentUser.username, 
+          groupId: this.activeGroup 
+        });
+      }
       this.isTypingEmitted = true;
     }
     
@@ -513,10 +815,17 @@ class UltraChat {
   stopTypingEmit() {
     if (!this.isTypingEmitted) return;
     
-    this.socket.emit('stop-typing', { 
-      from: this.currentUser.username, 
-      to: this.activeFriend 
-    });
+    if (this.activeFriend) {
+      this.socket.emit('stop-typing', { 
+        from: this.currentUser.username, 
+        to: this.activeFriend 
+      });
+    } else if (this.activeGroup) {
+      this.socket.emit('stop-group-typing', { 
+        from: this.currentUser.username, 
+        groupId: this.activeGroup 
+      });
+    }
     
     this.isTypingEmitted = false;
   }
@@ -527,8 +836,20 @@ class UltraChat {
     }
   }
   
+  showGroupTypingIndicator(data) {
+    if (this.activeGroup && data.groupId === this.activeGroup && data.from !== this.currentUser.username) {
+      this.typingIndicator.textContent = `${data.from} is typing...`;
+    }
+  }
+  
   hideTypingIndicator(data) {
     if (this.activeFriend && data.from === this.activeFriend) {
+      this.typingIndicator.textContent = '';
+    }
+  }
+  
+  hideGroupTypingIndicator(data) {
+    if (this.activeGroup && data.groupId === this.activeGroup && data.from !== this.currentUser.username) {
       this.typingIndicator.textContent = '';
     }
   }
@@ -585,10 +906,13 @@ class UltraChat {
       document.getElementById('chat-container').classList.remove('active');
       document.getElementById('back-to-friends').style.display = 'none';
       this.activeFriend = null;
+      this.activeGroup = null;
       this.activeChat.textContent = 'Select a friend to chat';
       this.messageInput.disabled = true;
       this.sendBtn.disabled = true;
       this.messagesContainer.innerHTML = '';
+      this.groupInfoBtn.style.display = 'none';
+      this.groupInfoPanel.classList.remove('active');
     }
   }
   

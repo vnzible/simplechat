@@ -7,682 +7,886 @@
   <link rel="icon" type="image/png" href="logo.png">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&family=Poppins:wght@300;400;600&display=swap">
   <style>
-    /* CSS will be optimized and included in the enhanced version */
     /* Reset and base */
-* { margin:0; padding:0; box-sizing:border-box; }
-body {
-  font-family:'Poppins',sans-serif;
-  background: linear-gradient(135deg, #0a0a1a 0%, #0f0f1f 25%, #141428 50%, #0c0c1f 75%, #070716 100%);
-  background-size: 400% 400%;
-  animation: gradientBG 15s ease infinite;
-  color:#f0f0f0; 
-  min-height:100vh; 
-  display:flex; 
-  flex-direction:column;
-  position: relative;
-  overflow: hidden;
-}
-
-@keyframes gradientBG {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-#particles-js {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  z-index: -1;
-}
-
-.section{display:none} 
-.section.active{display:block}
-
-/* Auth */
-#auth-section{
-  max-width:400px;
-  margin:100px auto;
-  padding:30px;
-  border-radius:16px;
-  background:rgba(10, 15, 35, 0.3);
-  backdrop-filter:blur(12px);
-  border: 1px solid rgba(100, 220, 255, 0.15);
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.1),
-              0 0 40px rgba(0, 150, 255, 0.1),
-              inset 0 0 15px rgba(0, 200, 255, 0.1);
-  text-align:center;
-  transition: all 0.3s ease;
-}
-
-#auth-section:hover {
-  box-shadow: 0 0 25px rgba(0, 255, 255, 0.2),
-              0 0 50px rgba(0, 150, 255, 0.2),
-              inset 0 0 20px rgba(0, 200, 255, 0.15);
-  transform: translateY(-2px);
-}
-
-#auth-form input{
-  width:100%;
-  padding:12px;
-  margin:10px 0;
-  border-radius:10px;
-  border:none;
-  background: rgba(10, 20, 40, 0.4);
-  border: 1px solid rgba(0, 200, 255, 0.3);
-  color:#fff;
-  transition: all 0.3s ease;
-  box-shadow: inset 0 0 10px rgba(0, 50, 100, 0.3),
-              0 0 5px rgba(0, 150, 255, 0.1);
-}
-
-#auth-form input:focus {
-  border-color: rgba(0, 230, 255, 0.7);
-  box-shadow: inset 0 0 15px rgba(0, 80, 160, 0.4),
-              0 0 15px rgba(0, 180, 255, 0.3);
-  outline: none;
-}
-
-#auth-form input::placeholder{color:#bbb}
-
-/* Buttons */
-.btn{
-  padding:10px 14px;
-  border-radius:10px;
-  border:none;
-  cursor:pointer;
-  font-weight:600;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-  text-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
-  box-shadow: 0 0 10px rgba(0, 200, 255, 0.3);
-}
-
-.btn:before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: rgba(255, 255, 255, 0.1);
-  transform: rotate(45deg);
-  transition: all 0.6s ease;
-  opacity: 0;
-}
-
-.btn:hover:before {
-  opacity: 1;
-  top: -20%;
-  left: -20%;
-}
-
-.btn.primary{
-  background:linear-gradient(135deg,#00e6ff,#0080ff);
-  color:#000;
-  box-shadow: 0 0 10px rgba(0, 230, 255, 0.5),
-              0 0 20px rgba(0, 150, 255, 0.3);
-}
-
-.btn.primary:hover{
-  box-shadow: 0 0 15px rgba(0, 230, 255, 0.7),
-              0 0 30px rgba(0, 150, 255, 0.4);
-  transform: translateY(-2px);
-}
-
-.btn.secondary{
-  background:transparent;
-  border:1px solid #00e6ff;
-  color:#00e6ff;
-  box-shadow: 0 0 8px rgba(0, 230, 255, 0.3),
-              inset 0 0 8px rgba(0, 230, 255, 0.2);
-}
-
-.btn.secondary:hover{
-  box-shadow: 0 0 12px rgba(0, 230, 255, 0.5),
-              inset 0 0 12px rgba(0, 230, 255, 0.3);
-  background: rgba(0, 230, 255, 0.1);
-  transform: translateY(-2px);
-}
-
-.btn.danger{
-  background:linear-gradient(135deg,#ff0066,#ff3300);
-  box-shadow: 0 0 10px rgba(255, 0, 102, 0.5),
-              0 0 20px rgba(255, 51, 0, 0.3);
-  color:#fff;
-}
-
-.btn.danger:hover{
-  box-shadow: 0 0 15px rgba(255, 0, 102, 0.7),
-              0 0 30px rgba(255, 51, 0, 0.4);
-  transform: translateY(-2px);
-}
-
-.btn.small{
-  padding:6px 8px;
-  border-radius:8px;
-  font-size:0.9rem;
-}
-
-/* Layout */
-header{
-  background: rgba(15, 20, 40, 0.4);
-  backdrop-filter: blur(15px);
-  border-bottom: 1px solid rgba(0, 200, 255, 0.2);
-  box-shadow: 0 5px 25px rgba(0, 100, 255, 0.15);
-  padding:12px 18px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-#main-content{
-  display:flex;
-  height:calc(100vh - 72px);
-}
-
-/* Friends sidebar */
-#friends-section{
-  width:320px;
-  padding:16px;
-  background:rgba(255,255,255,0.03);
-  border-right:1px solid rgba(255,255,255,0.05);
-  overflow-y:auto;
-}
-
-#friend-actions{
-  display:flex;
-  gap:8px;
-  margin-bottom:12px;
-}
-
-#friend-username{
-  flex:1;
-  padding:8px;
-  border-radius:8px;
-  border:none;
-  background: rgba(10, 20, 40, 0.4);
-  border: 1px solid rgba(0, 200, 255, 0.3);
-  color:#fff;
-  transition: all 0.3s ease;
-  box-shadow: inset 0 0 10px rgba(0, 50, 100, 0.3),
-              0 0 5px rgba(0, 150, 255, 0.1);
-}
-
-#friend-username:focus {
-  border-color: rgba(0, 230, 255, 0.7);
-  box-shadow: inset 0 0 15px rgba(0, 80, 160, 0.4),
-              0 0 15px rgba(0, 180, 255, 0.3);
-  outline: none;
-}
-
-.friend-item{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:10px;
-  border-radius:10px;
-  margin-bottom:8px;
-  background:rgba(255,255,255,0.02);
-  transition: all 0.3s ease;
-  border: 1px solid transparent;
-}
-
-.friend-item:hover {
-  background: rgba(0, 150, 255, 0.15);
-  border: 1px solid rgba(0, 200, 255, 0.3);
-  box-shadow: 0 0 10px rgba(0, 150, 255, 0.2);
-  transform: translateX(5px);
-}
-
-.friend-left{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.friend-name{
-  font-weight:600;
-}
-
-.status-dot{
-  width:10px;
-  height:10px;
-  border-radius:50%;
-  background:#6c757d;
-  display:inline-block;
-}
-
-.status-dot.online{
-  background:#43d86a;
-  box-shadow:0 0 6px rgba(67,216,106,0.8);
-  animation: statusPulse 2s infinite;
-}
-
-@keyframes statusPulse {
-  0% { box-shadow: 0 0 0 0 rgba(67, 216, 106, 0.8); }
-  70% { box-shadow: 0 0 0 10px rgba(67, 216, 106, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(67, 216, 106, 0); }
-}
-
-.unread-badge{
-  background: linear-gradient(135deg, #ff0066, #ff3300);
-  color:#fff;
-  padding:4px 8px;
-  border-radius:999px;
-  font-size:0.85rem;
-  margin-left:8px;
-  box-shadow: 0 0 8px rgba(255, 0, 102, 0.5);
-  animation: badgePulse 2s infinite;
-}
-
-@keyframes badgePulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-  100% { transform: scale(1); }
-}
-
-/* Chat area */
-#chat-container{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  background:rgba(255,255,255,0.02);
-}
-
-#chat-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:12px;
-  border-bottom:1px solid rgba(255,255,255,0.04);
-}
-
-#messages{
-  flex:1;
-  padding:16px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  overflow-y:auto;
-}
-
-/* message bubbles */
-.message{
-  max-width:70%;
-  padding:10px 14px;
-  border-radius:18px;
-  position:relative;
-}
-
-.message.sent{
-  margin-left:auto;
-  background:linear-gradient(135deg,#00e6ff,#0080ff);
-  color:#000;
-  box-shadow: 0 0 10px rgba(0, 200, 255, 0.3);
-  animation: messageSent 0.3s ease;
-}
-
-@keyframes messageSent {
-  from { transform: translateX(20px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-.message.received{
-  background:rgba(255,255,255,0.06);
-  align-self:flex-start;
-  color:#fff;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-  animation: messageReceived 0.3s ease;
-}
-
-@keyframes messageReceived {
-  from { transform: translateX(-20px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-.message .meta{
-  font-size:0.75rem;
-  margin-top:6px;
-  opacity:0.8;
-}
-
-/* Message actions (reply and menu) */
-.message-actions {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  display: flex;
-  gap: 4px;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.message:hover .message-actions {
-  opacity: 1;
-}
-
-.reply-btn, .menu-btn {
-  background: transparent;
-  border: none;
-  color: inherit;
-  cursor: pointer;
-  padding: 4px;
-  font-size: 14px;
-  border-radius: 4px;
-  transition: background 0.2s ease;
-}
-
-.reply-btn:hover, .menu-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-/* Message menu options */
-.message-menu {
-  position: relative;
-}
-
-.menu-options {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background: rgba(0, 0, 0, 0.8);
-  border-radius: 8px;
-  padding: 6px;
-  min-width: 140px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
-  z-index: 1000;
-}
-
-.menu-options.hidden {
-  display: none;
-}
-
-.menu-options button {
-  width: 100%;
-  background: transparent;
-  border: none;
-  color: #fff;
-  text-align: left;
-  padding: 6px 10px;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.menu-options button:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-/* deleted message look */
-.message.deleted{
-  font-style:italic;
-  opacity:0.8;
-  background:rgba(255,255,255,0.02);
-  color:#aaa;
-}
-
-/* reply preview above input */
-.reply-preview{
-  padding:8px;
-  background:rgba(0, 50, 100, 0.3);
-  border-left:3px solid #00e6ff;
-  display:flex;
-  gap:8px;
-  align-items:center;
-  box-shadow: 0 0 10px rgba(0, 200, 255, 0.2);
-}
-
-.reply-preview.hidden{
-  display:none;
-}
-
-.reply-text{
-  font-size:0.9rem;
-  color:#ddd;
-}
-
-/* input */
-#message-input{
-  display:flex;
-  gap:8px;
-  padding:12px;
-  border-top:1px solid rgba(255,255,255,0.04);
-}
-
-#message{
-  flex:1;
-  padding:12px;
-  border-radius:20px;
-  border:none;
-  background: rgba(10, 20, 40, 0.4);
-  border: 1px solid rgba(0, 200, 255, 0.3);
-  color:#fff;
-  transition: all 0.3s ease;
-  box-shadow: inset 0 0 10px rgba(0, 50, 100, 0.3),
-              0 0 5px rgba(0, 150, 255, 0.1);
-}
-
-#message:focus {
-  border-color: rgba(0, 230, 255, 0.7);
-  box-shadow: inset 0 0 15px rgba(0, 80, 160, 0.4),
-              0 0 15px rgba(0, 180, 255, 0.3);
-  outline: none;
-}
-
-/* small helpers */
-.muted{color:#bfbfbf}
-.small{font-size:0.85rem}
-
-/* Neon Text Effects */
-.title {
-  font-family: 'Orbitron', sans-serif;
-  text-shadow: 0 0 10px rgba(0, 200, 255, 0.7),
-               0 0 20px rgba(0, 150, 255, 0.5),
-               0 0 30px rgba(0, 100, 255, 0.3);
-  color: #fff;
-  animation: neonPulse 2s infinite alternate;
-}
-
-@keyframes neonPulse {
-  from { text-shadow: 0 0 10px rgba(0, 200, 255, 0.7), 0 0 20px rgba(0, 150, 255, 0.5), 0 0 30px rgba(0, 100, 255, 0.3); }
-  to { text-shadow: 0 0 15px rgba(0, 220, 255, 0.8), 0 0 25px rgba(0, 170, 255, 0.6), 0 0 35px rgba(0, 120, 255, 0.4); }
-}
-
-.subtitle {
-  color: #a0f0ff;
-  text-shadow: 0 0 8px rgba(0, 200, 255, 0.5);
-}
-
-/* Logo Enhancement */
-.logo {
-  font-family: 'Orbitron', sans-serif;
-  text-shadow: 0 0 10px rgba(0, 200, 255, 0.7),
-               0 0 20px rgba(0, 150, 255, 0.5);
-  color: #fff;
-  animation: logoGlow 3s infinite alternate;
-}
-
-@keyframes logoGlow {
-  from { text-shadow: 0 0 10px rgba(0, 200, 255, 0.7), 0 0 20px rgba(0, 150, 255, 0.5); }
-  to { text-shadow: 0 0 15px rgba(0, 220, 255, 0.8), 0 0 30px rgba(0, 170, 255, 0.6), 0 0 40px rgba(0, 120, 255, 0.4); }
-}
-
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(0, 30, 60, 0.2);
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(0, 200, 255, 0.5);
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 230, 255, 0.7);
-  box-shadow: 0 0 5px rgba(0, 200, 255, 0.5);
-}
-
-/* Section Transitions */
-.section {
-  animation: fadeIn 0.5s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Mobile Responsiveness Enhancements */
-@media (max-width:768px){
-  #main-content {
-    flex-direction: column;
-    height: auto;
-    min-height: calc(100vh - 72px);
-  }
-  
-  #friends-section {
-    width: 100%;
-    height: auto;
-    order: 1;
-    display: block;
-  }
-  
-  #chat-container {
-    order: 2;
-    height: 0;
-    overflow: hidden;
-    transition: height 0.3s ease;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  #chat-container.active {
-    height: 100vh;
-    width: 100%;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 100;
-    background: linear-gradient(135deg, #0a0a1a 0%, #0f0f1f 25%, #141428 50%, #0c0c1f 75%, #070716 100%);
-  }
-  
-  /* Ensure proper layout for mobile chat */
-  #chat-container.active {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  #messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px;
-    padding-bottom: 180px; /* Increased space for input and reply preview */
-  }
-  
-  #message-input {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: rgba(15, 20, 40, 0.95);
-    padding: 12px;
-    border-top: 1px solid rgba(0, 200, 255, 0.2);
-    z-index: 101;
-    display: flex;
-    gap: 8px;
-  }
-  
-  #message {
-    flex: 1;
-  }
-  
-  /* Adjust for mobile safe areas */
-  @supports(padding: max(0px)) {
-    #message-input {
-      padding-left: max(12px, env(safe-area-inset-left));
-      padding-right: max(12px, env(safe-area-inset-right));
-      padding-bottom: max(12px, env(safe-area-inset-bottom));
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Poppins',sans-serif;
+      background: linear-gradient(135deg, #0a0a1a 0%, #0f0f1f 25%, #141428 50%, #0c0c1f 75%, #070716 100%);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      color:#f0f0f0; 
+      min-height:100vh; 
+      display:flex; 
+      flex-direction:column;
+      position: relative;
+      overflow: hidden;
     }
-  }
-  
-  /* Fix reply preview positioning */
-  #reply-preview {
-    position: fixed;
-    bottom: 70px; /* Position above input */
-    left: 0;
-    right: 0;
-    z-index: 102;
-    background: rgba(0, 50, 100, 0.95);
-    margin: 0;
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
-    padding: 10px 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid rgba(0, 200, 255, 0.2);
-    display: none; /* Hidden by default */
-  }
-  
-  #reply-preview:not(.hidden) {
-    display: flex; /* Show only when not hidden */
-  }
-  
-  .back-button {
-    display: inline-block;
-    margin-right: 10px;
-    cursor: pointer;
-    font-size: 24px;
-    font-weight: bold;
-    color: #00e6ff;
-    text-shadow: 0 0 8px rgba(0, 230, 255, 0.7);
-    padding: 5px 10px;
-  }
-  
-  /* Hide chat elements when not active */
-  #chat-container:not(.active) {
-    display: none;
-  }
-  
-  /* Adjust header for mobile */
-  #chat-header {
-    position: sticky;
-    top: 0;
-    z-index: 103;
-    background: rgba(15, 20, 40, 0.95);
-    padding: 12px;
-    border-bottom: 1px solid rgba(0, 200, 255, 0.2);
-  }
-  
-  /* Ensure the reply preview cancel button is visible */
-  #cancel-reply {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-  }
-  
-  /* Adjust message actions for mobile */
-  .message-actions {
-    opacity: 1; /* Always show on mobile */
-    position: static;
-    margin-top: 8px;
-    justify-content: flex-end;
-  }
-}
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    #particles-js {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+
+    .section{display:none} 
+    .section.active{display:block}
+
+    /* Auth */
+    #auth-section{
+      max-width:400px;
+      margin:100px auto;
+      padding:30px;
+      border-radius:16px;
+      background:rgba(10, 15, 35, 0.3);
+      backdrop-filter:blur(12px);
+      border: 1px solid rgba(100, 220, 255, 0.15);
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.1),
+                  0 0 40px rgba(0, 150, 255, 0.1),
+                  inset 0 0 15px rgba(0, 200, 255, 0.1);
+      text-align:center;
+      transition: all 0.3s ease;
+    }
+
+    #auth-section:hover {
+      box-shadow: 0 0 25px rgba(0, 255, 255, 0.2),
+                  0 0 50px rgba(0, 150, 255, 0.2),
+                  inset 0 0 20px rgba(0, 200, 255, 0.15);
+      transform: translateY(-2px);
+    }
+
+    #auth-form input{
+      width:100%;
+      padding:12px;
+      margin:10px 0;
+      border-radius:10px;
+      border:none;
+      background: rgba(10, 20, 40, 0.4);
+      border: 1px solid rgba(0, 200, 255, 0.3);
+      color:#fff;
+      transition: all 0.3s ease;
+      box-shadow: inset 0 0 10px rgba(0, 50, 100, 0.3),
+                  0 0 5px rgba(0, 150, 255, 0.1);
+    }
+
+    #auth-form input:focus {
+      border-color: rgba(0, 230, 255, 0.7);
+      box-shadow: inset 0 0 15px rgba(0, 80, 160, 0.4),
+                  0 0 15px rgba(0, 180, 255, 0.3);
+      outline: none;
+    }
+
+    #auth-form input::placeholder{color:#bbb}
+
+    /* Buttons */
+    .btn{
+      padding:10px 14px;
+      border-radius:10px;
+      border:none;
+      cursor:pointer;
+      font-weight:600;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      text-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
+      box-shadow: 0 0 10px rgba(0, 200, 255, 0.3);
+    }
+
+    .btn:before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: rgba(255, 255, 255, 0.1);
+      transform: rotate(45deg);
+      transition: all 0.6s ease;
+      opacity: 0;
+    }
+
+    .btn:hover:before {
+      opacity: 1;
+      top: -20%;
+      left: -20%;
+    }
+
+    .btn.primary{
+      background:linear-gradient(135deg,#00e6ff,#0080ff);
+      color:#000;
+      box-shadow: 0 0 10px rgba(0, 230, 255, 0.5),
+                  0 0 20px rgba(0, 150, 255, 0.3);
+    }
+
+    .btn.primary:hover{
+      box-shadow: 0 0 15px rgba(0, 230, 255, 0.7),
+                  0 0 30px rgba(0, 150, 255, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .btn.secondary{
+      background:transparent;
+      border:1px solid #00e6ff;
+      color:#00e6ff;
+      box-shadow: 0 0 8px rgba(0, 230, 255, 0.3),
+                  inset 0 0 8px rgba(0, 230, 255, 0.2);
+    }
+
+    .btn.secondary:hover{
+      box-shadow: 0 0 12px rgba(0, 230, 255, 0.5),
+                  inset 0 0 12px rgba(0, 230, 255, 0.3);
+      background: rgba(0, 230, 255, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .btn.danger{
+      background:linear-gradient(135deg,#ff0066,#ff3300);
+      box-shadow: 0 0 10px rgba(255, 0, 102, 0.5),
+                  0 0 20px rgba(255, 51, 0, 0.3);
+      color:#fff;
+    }
+
+    .btn.danger:hover{
+      box-shadow: 0 0 15px rgba(255, 0, 102, 0.7),
+                  0 0 30px rgba(255, 51, 0, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .btn.small{
+      padding:6px 8px;
+      border-radius:8px;
+      font-size:0.9rem;
+    }
+
+    /* Layout */
+    header{
+      background: rgba(15, 20, 40, 0.4);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid rgba(0, 200, 255, 0.2);
+      box-shadow: 0 5px 25px rgba(0, 100, 255, 0.15);
+      padding:12px 18px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    #main-content{
+      display:flex;
+      height:calc(100vh - 72px);
+    }
+
+    /* Friends sidebar */
+    #friends-section{
+      width:320px;
+      padding:16px;
+      background:rgba(255,255,255,0.03);
+      border-right:1px solid rgba(255,255,255,0.05);
+      overflow-y:auto;
+    }
+
+    #friend-actions{
+      display:flex;
+      gap:8px;
+      margin-bottom:12px;
+    }
+
+    #friend-username{
+      flex:1;
+      padding:8px;
+      border-radius:8px;
+      border:none;
+      background: rgba(10, 20, 40, 0.4);
+      border: 1px solid rgba(0, 200, 255, 0.3);
+      color:#fff;
+      transition: all 0.3s ease;
+      box-shadow: inset 0 0 10px rgba(0, 50, 100, 0.3),
+                  0 0 5px rgba(0, 150, 255, 0.1);
+    }
+
+    #friend-username:focus {
+      border-color: rgba(0, 230, 255, 0.7);
+      box-shadow: inset 0 0 15px rgba(0, 80, 160, 0.4),
+                  0 0 15px rgba(0, 180, 255, 0.3);
+      outline: none;
+    }
+
+    .friend-item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:10px;
+      border-radius:10px;
+      margin-bottom:8px;
+      background:rgba(255,255,255,0.02);
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+    }
+
+    .friend-item:hover {
+      background: rgba(0, 150, 255, 0.15);
+      border: 1px solid rgba(0, 200, 255, 0.3);
+      box-shadow: 0 0 10px rgba(0, 150, 255, 0.2);
+      transform: translateX(5px);
+    }
+
+    .friend-left{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .friend-name{
+      font-weight:600;
+    }
+
+    .status-dot{
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      background:#6c757d;
+      display:inline-block;
+    }
+
+    .status-dot.online{
+      background:#43d86a;
+      box-shadow:0 0 6px rgba(67,216,106,0.8);
+      animation: statusPulse 2s infinite;
+    }
+
+    @keyframes statusPulse {
+      0% { box-shadow: 0 0 0 0 rgba(67, 216, 106, 0.8); }
+      70% { box-shadow: 0 0 0 10px rgba(67, 216, 106, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(67, 216, 106, 0); }
+    }
+
+    .unread-badge{
+      background: linear-gradient(135deg, #ff0066, #ff3300);
+      color:#fff;
+      padding:4px 8px;
+      border-radius:999px;
+      font-size:0.85rem;
+      margin-left:8px;
+      box-shadow: 0 0 8px rgba(255, 0, 102, 0.5);
+      animation: badgePulse 2s infinite;
+    }
+
+    @keyframes badgePulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    /* Group-specific styles */
+    .group-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      background: rgba(255, 255, 255, 0.02);
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+      position: relative;
+    }
+
+    .group-item:hover {
+      background: rgba(0, 150, 255, 0.15);
+      border: 1px solid rgba(0, 200, 255, 0.3);
+      box-shadow: 0 0 10px rgba(0, 150, 255, 0.2);
+      transform: translateX(5px);
+    }
+
+    .group-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .group-name {
+      font-weight: 600;
+    }
+
+    .group-members-count {
+      font-size: 0.8rem;
+      color: #a0f0ff;
+      margin-left: 8px;
+    }
+
+    .group-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    /* Modal styles for group creation */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal.active {
+      display: flex;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-content {
+      background: rgba(10, 15, 35, 0.95);
+      border-radius: 16px;
+      padding: 24px;
+      width: 90%;
+      max-width: 500px;
+      border: 1px solid rgba(100, 220, 255, 0.2);
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-title {
+      font-family: 'Orbitron', sans-serif;
+      color: #00e6ff;
+      text-shadow: 0 0 10px rgba(0, 200, 255, 0.7);
+    }
+
+    .close-modal {
+      background: transparent;
+      border: none;
+      color: #00e6ff;
+      font-size: 24px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .close-modal:hover {
+      text-shadow: 0 0 10px rgba(0, 200, 255, 0.9);
+      transform: rotate(90deg);
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 10px;
+      border: none;
+      background: rgba(10, 20, 40, 0.4);
+      border: 1px solid rgba(0, 200, 255, 0.3);
+      color: #fff;
+      transition: all 0.3s ease;
+      box-shadow: inset 0 0 10px rgba(0, 50, 100, 0.3),
+                  0 0 5px rgba(0, 150, 255, 0.1);
+    }
+
+    .modal-input:focus {
+      border-color: rgba(0, 230, 255, 0.7);
+      box-shadow: inset 0 0 15px rgba(0, 80, 160, 0.4),
+                  0 0 15px rgba(0, 180, 255, 0.3);
+      outline: none;
+    }
+
+    .friends-checkbox {
+      display: flex;
+      flex-direction: column;
+      max-height: 200px;
+      overflow-y: auto;
+      margin: 10px 0;
+      padding: 10px;
+      background: rgba(10, 20, 40, 0.3);
+      border-radius: 10px;
+    }
+
+    .friend-checkbox {
+      display: flex;
+      align-items: center;
+      padding: 8px;
+      border-radius: 8px;
+      margin: 4px 0;
+      transition: all 0.2s ease;
+    }
+
+    .friend-checkbox:hover {
+      background: rgba(0, 150, 255, 0.1);
+    }
+
+    .friend-checkbox input {
+      margin-right: 10px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    /* Group info panel */
+    .group-info-panel {
+      padding: 12px;
+      background: rgba(10, 20, 40, 0.3);
+      border-radius: 10px;
+      margin-bottom: 12px;
+      display: none;
+    }
+
+    .group-info-panel.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .group-members-list {
+      margin-top: 10px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .group-member {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px;
+      margin: 4px 0;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+    }
+
+    .admin-badge {
+      background: linear-gradient(135deg, #00e6ff, #0080ff);
+      color: #000;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: bold;
+    }
+
+    /* Chat area */
+    #chat-container{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      background:rgba(255,255,255,0.02);
+    }
+
+    #chat-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:12px;
+      border-bottom:1px solid rgba(255,255,255,0.04);
+    }
+
+    #messages{
+      flex:1;
+      padding:16px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      overflow-y:auto;
+    }
+
+    /* message bubbles */
+    .message{
+      max-width:70%;
+      padding:10px 14px;
+      border-radius:18px;
+      position:relative;
+    }
+
+    .message.sent{
+      margin-left:auto;
+      background:linear-gradient(135deg,#00e6ff,#0080ff);
+      color:#000;
+      box-shadow: 0 0 10px rgba(0, 200, 255, 0.3);
+      animation: messageSent 0.3s ease;
+    }
+
+    @keyframes messageSent {
+      from { transform: translateX(20px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .message.received{
+      background:rgba(255,255,255,0.06);
+      align-self:flex-start;
+      color:#fff;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+      animation: messageReceived 0.3s ease;
+    }
+
+    @keyframes messageReceived {
+      from { transform: translateX(-20px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .message .meta{
+      font-size:0.75rem;
+      margin-top:6px;
+      opacity:0.8;
+    }
+
+    /* Message actions (reply and menu) */
+    .message-actions {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      display: flex;
+      gap: 4px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .message:hover .message-actions {
+      opacity: 1;
+    }
+
+    .reply-btn, .menu-btn {
+      background: transparent;
+      border: none;
+      color: inherit;
+      cursor: pointer;
+      padding: 4px;
+      font-size: 14px;
+      border-radius: 4px;
+      transition: background 0.2s ease;
+    }
+
+    .reply-btn:hover, .menu-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Message menu options */
+    .message-menu {
+      position: relative;
+    }
+
+    .menu-options {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 8px;
+      padding: 6px;
+      min-width: 140px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+      z-index: 1000;
+    }
+
+    .menu-options.hidden {
+      display: none;
+    }
+
+    .menu-options button {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: #fff;
+      text-align: left;
+      padding: 6px 10px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background 0.2s ease;
+    }
+
+    .menu-options button:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* deleted message look */
+    .message.deleted{
+      font-style:italic;
+      opacity:0.8;
+      background:rgba(255,255,255,0.02);
+      color:#aaa;
+    }
+
+    /* reply preview above input */
+    .reply-preview{
+      padding:8px;
+      background:rgba(0, 50, 100, 0.3);
+      border-left:3px solid #00e6ff;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      box-shadow: 0 0 10px rgba(0, 200, 255, 0.2);
+    }
+
+    .reply-preview.hidden{
+      display:none;
+    }
+
+    .reply-text{
+      font-size:0.9rem;
+      color:#ddd;
+    }
+
+    /* input */
+    #message-input{
+      display:flex;
+      gap:8px;
+      padding:12px;
+      border-top:1px solid rgba(255,255,255,0.04);
+    }
+
+    #message{
+      flex:1;
+      padding:12px;
+      border-radius:20px;
+      border:none;
+      background: rgba(10, 20, 40, 0.4);
+      border: 1px solid rgba(0, 200, 255, 0.3);
+      color:#fff;
+      transition: all 0.3s ease;
+      box-shadow: inset 0 0 10px rgba(0, 50, 100, 0.3),
+                  0 0 5px rgba(0, 150, 255, 0.1);
+    }
+
+    #message:focus {
+      border-color: rgba(0, 230, 255, 0.7);
+      box-shadow: inset 0 0 15px rgba(0, 80, 160, 0.4),
+                  0 0 15px rgba(0, 180, 255, 0.3);
+      outline: none;
+    }
+
+    /* small helpers */
+    .muted{color:#bfbfbf}
+    .small{font-size:0.85rem}
+
+    /* Neon Text Effects */
+    .title {
+      font-family: 'Orbitron', sans-serif;
+      text-shadow: 0 0 10px rgba(0, 200, 255, 0.7),
+                   0 0 20px rgba(0, 150, 255, 0.5),
+                   0 0 30px rgba(0, 100, 255, 0.3);
+      color: #fff;
+      animation: neonPulse 2s infinite alternate;
+    }
+
+    @keyframes neonPulse {
+      from { text-shadow: 0 0 10px rgba(0, 200, 255, 0.7), 0 0 20px rgba(0, 150, 255, 0.5), 0 0 30px rgba(0, 100, 255, 0.3); }
+      to { text-shadow: 0 0 15px rgba(0, 220, 255, 0.8), 0 0 25px rgba(0, 170, 255, 0.6), 0 0 35px rgba(0, 120, 255, 0.4); }
+    }
+
+    .subtitle {
+      color: #a0f0ff;
+      text-shadow: 0 0 8px rgba(0, 200, 255, 0.5);
+    }
+
+    /* Logo Enhancement */
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      text-shadow: 0 0 10px rgba(0, 200, 255, 0.7),
+                   0 0 20px rgba(0, 150, 255, 0.5);
+      color: #fff;
+      animation: logoGlow 3s infinite alternate;
+    }
+
+    @keyframes logoGlow {
+      from { text-shadow: 0 0 10px rgba(0, 200, 255, 0.7), 0 0 20px rgba(0, 150, 255, 0.5); }
+      to { text-shadow: 0 0 15px rgba(0, 220, 255, 0.8), 0 0 30px rgba(0, 170, 255, 0.6), 0 0 40px rgba(0, 120, 255, 0.4); }
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 30, 60, 0.2);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 200, 255, 0.5);
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 230, 255, 0.7);
+      box-shadow: 0 0 5px rgba(0, 200, 255, 0.5);
+    }
+
+    /* Section Transitions */
+    .section {
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Mobile Responsiveness Enhancements */
+    @media (max-width:768px){
+      #main-content {
+        flex-direction: column;
+        height: auto;
+        min-height: calc(100vh - 72px);
+      }
+      
+      #friends-section {
+        width: 100%;
+        height: auto;
+        order: 1;
+        display: block;
+      }
+      
+      #chat-container {
+        order: 2;
+        height: 0;
+        overflow: hidden;
+        transition: height 0.3s ease;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      #chat-container.active {
+        height: 100vh;
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 100;
+        background: linear-gradient(135deg, #0a0a1a 0%, #0f0f1f 25%, #141428 50%, #0c0c1f 75%, #070716 100%);
+      }
+      
+      /* Ensure proper layout for mobile chat */
+      #chat-container.active {
+        display: flex;
+        flex-direction: column;
+      }
+      
+      #messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+        padding-bottom: 180px; /* Increased space for input and reply preview */
+      }
+      
+      #message-input {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(15, 20, 40, 0.95);
+        padding: 12px;
+        border-top: 1px solid rgba(0, 200, 255, 0.2);
+        z-index: 101;
+        display: flex;
+        gap: 8px;
+      }
+      
+      #message {
+        flex: 1;
+      }
+      
+      /* Adjust for mobile safe areas */
+      @supports(padding: max(0px)) {
+        #message-input {
+          padding-left: max(12px, env(safe-area-inset-left));
+          padding-right: max(12px, env(safe-area-inset-right));
+          padding-bottom: max(12px, env(safe-area-inset-bottom));
+        }
+      }
+      
+      /* Fix reply preview positioning */
+      #reply-preview {
+        position: fixed;
+        bottom: 70px; /* Position above input */
+        left: 0;
+        right: 0;
+        z-index: 102;
+        background: rgba(0, 50, 100, 0.95);
+        margin: 0;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        padding: 10px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(0, 200, 255, 0.2);
+        display: none; /* Hidden by default */
+      }
+      
+      #reply-preview:not(.hidden) {
+        display: flex; /* Show only when not hidden */
+      }
+      
+      .back-button {
+        display: inline-block;
+        margin-right: 10px;
+        cursor: pointer;
+        font-size: 24px;
+        font-weight: bold;
+        color: #00e6ff;
+        text-shadow: 0 0 8px rgba(0, 230, 255, 0.7);
+        padding: 5px 10px;
+      }
+      
+      /* Hide chat elements when not active */
+      #chat-container:not(.active) {
+        display: none;
+      }
+      
+      /* Adjust header for mobile */
+      #chat-header {
+        position: sticky;
+        top: 0;
+        z-index: 103;
+        background: rgba(15, 20, 40, 0.95);
+        padding: 12px;
+        border-bottom: 1px solid rgba(0, 200, 255, 0.2);
+      }
+      
+      /* Ensure the reply preview cancel button is visible */
+      #cancel-reply {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+      }
+      
+      /* Adjust message actions for mobile */
+      .message-actions {
+        opacity: 1; /* Always show on mobile */
+        position: static;
+        margin-top: 8px;
+        justify-content: flex-end;
+      }
+      
+      /* Modal adjustments for mobile */
+      .modal-content {
+        width: 85%;
+        padding: 20px;
+      }
+      
+      .friends-checkbox {
+        max-height: 150px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -716,8 +920,12 @@ header{
           <div id="friend-actions">
             <input type="text" id="friend-username" placeholder="Friend's username">
             <button id="add-friend-btn" class="btn primary">Add Friend</button>
+            <button id="create-group-btn" class="btn secondary">Create Group</button>
           </div>
           <div id="friends-list"></div>
+
+          <h3>Groups</h3>
+          <div id="groups-list"></div>
 
           <h3>Friend Requests</h3>
           <div id="friend-requests"></div>
@@ -735,6 +943,18 @@ header{
               </div>
             </div>
             <div id="typing-indicator" class="muted small"></div>
+            <div id="group-info-btn" style="display: none;">
+              <button class="btn small">Group Info</button>
+            </div>
+          </div>
+
+          <div id="group-info-panel" class="group-info-panel">
+            <h4>Group Members</h4>
+            <div id="group-members-list" class="group-members-list"></div>
+            <div style="margin-top: 10px;">
+              <input type="text" id="add-member-input" placeholder="Username to add" style="width: 60%;">
+              <button id="add-member-btn" class="btn small">Add</button>
+            </div>
           </div>
 
           <div id="messages"></div>
@@ -756,10 +976,995 @@ header{
         </div>
       </div>
     </div>
+
+    <!-- Group Creation Modal -->
+    <div id="create-group-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">Create New Group</h3>
+          <button class="close-modal">&times;</button>
+        </div>
+        <input type="text" id="group-name-input" class="modal-input" placeholder="Group Name">
+        <div class="friends-checkbox" id="friends-checkbox-container">
+          <!-- Friends checkboxes will be added here dynamically -->
+        </div>
+        <div class="modal-actions">
+          <button id="cancel-create-group" class="btn secondary">Cancel</button>
+          <button id="confirm-create-group" class="btn primary">Create Group</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
-  <script src="script.js"></script>
+  <script>
+    // Ultra Chat Application with Group Functionality
+    // Enhanced version with group chat features
+
+    class UltraChat {
+      constructor() {
+        this.socket = io();
+        this.currentUser = null;
+        this.activeFriend = null;
+        this.activeGroup = null;
+        this.replyToMessageId = null;
+        this.typingTimeout = null;
+        this.isTypingEmitted = false;
+        this.friends = [];
+        
+        // Initialize the app
+        this.init();
+      }
+      
+      init() {
+        // Cache DOM elements
+        this.cacheDOM();
+        
+        // Initialize particles background
+        this.initParticles();
+        
+        // Bind events
+        this.bindEvents();
+        
+        // Auto-login if session exists
+        this.autoLogin();
+      }
+      
+      cacheDOM() {
+        // Authentication elements
+        this.authSection = document.getElementById('auth-section');
+        this.usernameInput = document.getElementById('username');
+        this.passwordInput = document.getElementById('password');
+        this.loginBtn = document.getElementById('login-btn');
+        this.registerBtn = document.getElementById('register-btn');
+        
+        // Chat elements
+        this.chatSection = document.getElementById('chat-section');
+        this.currentUserSpan = document.getElementById('current-user');
+        this.logoutBtn = document.getElementById('logout-btn');
+        this.friendUsernameInput = document.getElementById('friend-username');
+        this.addFriendBtn = document.getElementById('add-friend-btn');
+        this.createGroupBtn = document.getElementById('create-group-btn');
+        this.friendsListEl = document.getElementById('friends-list');
+        this.groupsListEl = document.getElementById('groups-list');
+        this.friendRequests = document.getElementById('friend-requests');
+        this.messagesContainer = document.getElementById('messages');
+        this.messageInput = document.getElementById('message');
+        this.sendBtn = document.getElementById('send-btn');
+        this.activeChat = document.getElementById('active-chat');
+        this.typingIndicator = document.getElementById('typing-indicator');
+        this.lastSeenEl = document.getElementById('last-seen');
+        this.replyPreview = document.getElementById('reply-preview');
+        this.replyWho = document.getElementById('reply-who');
+        this.replyText = document.getElementById('reply-text');
+        this.cancelReplyBtn = document.getElementById('cancel-reply');
+        this.backToFriendsBtn = document.getElementById('back-to-friends');
+        this.groupInfoBtn = document.getElementById('group-info-btn');
+        this.groupInfoPanel = document.getElementById('group-info-panel');
+        this.groupMembersList = document.getElementById('group-members-list');
+        this.addMemberInput = document.getElementById('add-member-input');
+        this.addMemberBtn = document.getElementById('add-member-btn');
+        
+        // Modal elements
+        this.createGroupModal = document.getElementById('create-group-modal');
+        this.groupNameInput = document.getElementById('group-name-input');
+        this.friendsCheckboxContainer = document.getElementById('friends-checkbox-container');
+        this.closeModalBtn = document.querySelector('.close-modal');
+        this.cancelCreateGroupBtn = document.getElementById('cancel-create-group');
+        this.confirmCreateGroupBtn = document.getElementById('confirm-create-group');
+      }
+      
+      initParticles() {
+        particlesJS('particles-js', {
+          particles: {
+            number: { value: 80, density: { enable: true, value_area: 800 } },
+            color: { value: "#00e6ff" },
+            shape: { type: "circle" },
+            opacity: { value: 0.5, random: true },
+            size: { value: 3, random: true },
+            line_linked: {
+              enable: true,
+              distance: 150,
+              color: "#00a0ff",
+              opacity: 0.4,
+              width: 1
+            },
+            move: {
+              enable: true,
+              speed: 2,
+              direction: "none",
+              random: true,
+              straight: false,
+              out_mode: "out",
+              bounce: false
+            }
+          },
+          interactivity: {
+            detect_on: "canvas",
+            events: {
+              onhover: { enable: true, mode: "grab" },
+              onclick: { enable: true, mode: "push" },
+              resize: true
+            }
+          },
+          retina_detect: true
+        });
+      }
+      
+      bindEvents() {
+        // Authentication events
+        this.loginBtn.addEventListener('click', () => this.login());
+        this.registerBtn.addEventListener('click', () => this.register());
+        this.logoutBtn.addEventListener('click', () => this.logout());
+        
+        // Friend management events
+        this.addFriendBtn.addEventListener('click', () => this.addFriend());
+        this.createGroupBtn.addEventListener('click', () => this.showCreateGroupModal());
+        
+        // Message events
+        this.sendBtn.addEventListener('click', () => this.sendMessage());
+        this.cancelReplyBtn.addEventListener('click', () => this.cancelReply());
+        this.messageInput.addEventListener('input', () => this.onTypingInput());
+        this.messageInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') this.sendMessage();
+        });
+        
+        // Group events
+        this.groupInfoBtn.addEventListener('click', () => this.toggleGroupInfo());
+        this.addMemberBtn.addEventListener('click', () => this.addGroupMember());
+        
+        // Navigation events
+        this.backToFriendsBtn.addEventListener('click', () => this.showFriendsView());
+        
+        // Modal events
+        this.closeModalBtn.addEventListener('click', () => this.hideCreateGroupModal());
+        this.cancelCreateGroupBtn.addEventListener('click', () => this.hideCreateGroupModal());
+        this.confirmCreateGroupBtn.addEventListener('click', () => this.createGroup());
+        
+        // Socket events
+        this.bindSocketEvents();
+      }
+      
+      bindSocketEvents() {
+        this.socket.on('connect', () => console.log('Connected to server'));
+        
+        this.socket.on('auth-response', (data) => this.handleAuthResponse(data));
+        this.socket.on('friends-list', (friends) => {
+          this.friends = friends;
+          this.renderFriendsList(friends);
+        });
+        this.socket.on('groups-list', (groups) => this.renderGroupsList(groups));
+        this.socket.on('requests-list', (requests) => this.renderFriendRequests(requests));
+        this.socket.on('new-message', (msg) => this.handleNewMessage(msg));
+        this.socket.on('chat-history', (messages) => this.renderChatHistory(messages));
+        this.socket.on('group-chat-history', (data) => this.renderGroupChatHistory(data));
+        this.socket.on('message-deleted', (data) => this.handleMessageDeleted(data));
+        this.socket.on('typing', (data) => this.showTypingIndicator(data));
+        this.socket.on('group-typing', (data) => this.showGroupTypingIndicator(data));
+        this.socket.on('stop-typing', (data) => this.hideTypingIndicator(data));
+        this.socket.on('stop-group-typing', (data) => this.hideGroupTypingIndicator(data));
+        this.socket.on('user-online', (data) => this.handleUserOnline(data));
+        this.socket.on('user-offline', (data) => this.handleUserOffline(data));
+        this.socket.on('last-seen', (data) => this.updateLastSeen(data));
+        this.socket.on('new-request', (data) => this.handleNewRequest(data));
+        this.socket.on('action-failed', (data) => this.handleActionFailed(data));
+        this.socket.on('group-created', (data) => this.handleGroupCreated(data));
+        this.socket.on('group-info', (data) => this.handleGroupInfo(data));
+        this.socket.on('group-member-added', (data) => this.handleGroupMemberAdded(data));
+        this.socket.on('group-member-removed', (data) => this.handleGroupMemberRemoved(data));
+      }
+      
+      // Authentication methods
+      login() {
+        const username = this.usernameInput.value.trim();
+        const password = this.passwordInput.value;
+        
+        if (!this.validateCredentials(username, password)) return;
+        
+        this.socket.emit('login', { username, password });
+      }
+      
+      register() {
+        const username = this.usernameInput.value.trim();
+        const password = this.passwordInput.value;
+        
+        if (!this.validateCredentials(username, password)) return;
+        
+        this.socket.emit('register', { username, password });
+      }
+      
+      validateCredentials(username, password) {
+        if (!username || username.length < 1 || username.length > 12) {
+          alert('Username must be 1-12 characters');
+          return false;
+        }
+        
+        if (!password) {
+          alert('Enter password');
+          return false;
+        }
+        
+        return true;
+      }
+      
+      handleAuthResponse(data) {
+        if (data.success) {
+          this.currentUser = data.user;
+          this.currentUserSpan.textContent = this.currentUser.username;
+          this.authSection.classList.remove('active');
+          this.chatSection.classList.add('active');
+          this.saveUserSession(this.currentUser.username);
+          
+          // Request friends, groups & requests
+          this.socket.emit('get-friends', { username: this.currentUser.username });
+          this.socket.emit('get-groups', { username: this.currentUser.username });
+          this.socket.emit('get-requests', { username: this.currentUser.username });
+        } else {
+          alert(data.message || 'Auth error');
+          this.clearUserSession();
+        }
+      }
+      
+      logout() {
+        this.clearUserSession();
+        this.currentUser = null;
+        this.activeFriend = null;
+        this.activeGroup = null;
+        this.authSection.classList.add('active');
+        this.chatSection.classList.remove('active');
+        this.usernameInput.value = '';
+        this.passwordInput.value = '';
+        this.messageInput.value = '';
+        this.messagesContainer.innerHTML = '';
+        this.socket.disconnect();
+        setTimeout(() => { this.socket.connect(); }, 200);
+      }
+      
+      // Friend management methods
+      addFriend() {
+        const friendUsername = this.friendUsernameInput.value.trim();
+        if (!friendUsername) return;
+        
+        this.socket.emit('add-friend', { 
+          username: this.currentUser.username, 
+          friendUsername 
+        });
+        
+        this.friendUsernameInput.value = '';
+      }
+      
+      renderFriendsList(friends) {
+        this.friendsListEl.innerHTML = '';
+        
+        friends.forEach(f => {
+          const el = document.createElement('div');
+          el.className = 'friend-item';
+          el.innerHTML = `
+            <div class="friend-left">
+              <span class="status-dot ${f.online ? 'online' : ''}" 
+                    title="${f.online ? 'Online' : 'Offline'}"></span>
+              <span class="friend-name">${f.username}</span>
+              ${f.unread > 0 ? `<span class="unread-badge">${f.unread}</span>` : ''}
+            </div>
+            <div>
+              <button class="chat-btn btn small" data-friend="${f.username}">Chat</button>
+              <button class="remove-btn btn small" data-friend="${f.username}">Remove</button>
+            </div>
+          `;
+          
+          this.friendsListEl.appendChild(el);
+        });
+        
+        // Attach event listeners to friend items
+        this.attachFriendEvents();
+      }
+      
+      renderGroupsList(groups) {
+        this.groupsListEl.innerHTML = '';
+        
+        groups.forEach(g => {
+          const el = document.createElement('div');
+          el.className = 'group-item';
+          el.innerHTML = `
+            <div class="group-left">
+              <span class="group-name">${g.name}</span>
+              <span class="group-members-count">${g.members.length} members</span>
+              ${g.unread > 0 ? `<span class="unread-badge">${g.unread}</span>` : ''}
+            </div>
+            <div class="group-actions">
+              <button class="group-chat-btn btn small" data-group="${g._id}">Chat</button>
+              <button class="leave-group-btn btn small" data-group="${g._id}">Leave</button>
+            </div>
+          `;
+          
+          this.groupsListEl.appendChild(el);
+        });
+        
+        // Attach event listeners to group items
+        this.attachGroupEvents();
+      }
+      
+      attachFriendEvents() {
+        // Chat buttons
+        document.querySelectorAll('.chat-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const friend = e.target.getAttribute('data-friend');
+            this.startChatWithFriend(friend);
+          });
+        });
+        
+        // Remove buttons
+        document.querySelectorAll('.remove-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const friend = e.target.getAttribute('data-friend');
+            this.socket.emit('remove-friend', { 
+              username: this.currentUser.username, 
+              friendUsername: friend 
+            });
+          });
+        });
+      }
+      
+      attachGroupEvents() {
+        // Group chat buttons
+        document.querySelectorAll('.group-chat-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const groupId = e.target.getAttribute('data-group');
+            this.startChatWithGroup(groupId);
+          });
+        });
+        
+        // Leave group buttons
+        document.querySelectorAll('.leave-group-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const groupId = e.target.getAttribute('data-group');
+            this.socket.emit('leave-group', { 
+              username: this.currentUser.username, 
+              groupId 
+            });
+          });
+        });
+      }
+      
+      renderFriendRequests(requests) {
+        this.friendRequests.innerHTML = '';
+        
+        requests.forEach(r => {
+          const el = document.createElement('div');
+          el.className = 'request-item';
+          el.innerHTML = `
+            <span>${r}</span>
+            <div>
+              <button class="accept-btn btn small" data-request="${r}">Accept</button>
+              <button class="reject-btn btn small" data-request="${r}">Reject</button>
+            </div>
+          `;
+          
+          this.friendRequests.appendChild(el);
+        });
+        
+        // Attach event listeners to request buttons
+        this.attachRequestEvents();
+      }
+      
+      attachRequestEvents() {
+        // Accept buttons
+        document.querySelectorAll('.accept-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const req = e.target.getAttribute('data-request');
+            this.socket.emit('accept-request', { 
+              username: this.currentUser.username, 
+              requestUsername: req 
+            });
+          });
+        });
+        
+        // Reject buttons
+        document.querySelectorAll('.reject-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const req = e.target.getAttribute('data-request');
+            this.socket.emit('reject-request', { 
+              username: this.currentUser.username, 
+              requestUsername: req 
+            });
+          });
+        });
+      }
+      
+      // Group methods
+      showCreateGroupModal() {
+        // Populate friends checkboxes
+        this.friendsCheckboxContainer.innerHTML = '';
+        
+        this.friends.forEach(friend => {
+          const checkboxDiv = document.createElement('div');
+          checkboxDiv.className = 'friend-checkbox';
+          checkboxDiv.innerHTML = `
+            <input type="checkbox" id="friend-${friend.username}" value="${friend.username}">
+            <label for="friend-${friend.username}">${friend.username}</label>
+          `;
+          this.friendsCheckboxContainer.appendChild(checkboxDiv);
+        });
+        
+        this.createGroupModal.classList.add('active');
+      }
+      
+      hideCreateGroupModal() {
+        this.createGroupModal.classList.remove('active');
+        this.groupNameInput.value = '';
+      }
+      
+      createGroup() {
+        const groupName = this.groupNameInput.value.trim();
+        if (!groupName) {
+          alert('Please enter a group name');
+          return;
+        }
+        
+        const selectedFriends = [];
+        document.querySelectorAll('#friends-checkbox-container input:checked').forEach(checkbox => {
+          selectedFriends.push(checkbox.value);
+        });
+        
+        if (selectedFriends.length === 0) {
+          alert('Please select at least one friend');
+          return;
+        }
+        
+        this.socket.emit('create-group', {
+          name: groupName,
+          members: selectedFriends,
+          createdBy: this.currentUser.username
+        });
+        
+        this.hideCreateGroupModal();
+      }
+      
+      handleGroupCreated(data) {
+        if (data.success) {
+          this.socket.emit('get-groups', { username: this.currentUser.username });
+        } else {
+          alert(data.message || 'Failed to create group');
+        }
+      }
+      
+      startChatWithGroup(groupId) {
+        this.activeGroup = groupId;
+        this.activeFriend = null;
+        this.activeChat.textContent = `Group: ${groupId}`; // Will be updated with actual group name
+        this.messageInput.disabled = false;
+        this.sendBtn.disabled = false;
+        this.groupInfoBtn.style.display = 'block';
+        this.groupInfoPanel.classList.remove('active');
+        
+        this.loadGroupChat(groupId);
+        this.showChatView();
+        
+        // Get group info
+        this.socket.emit('get-group-info', { groupId });
+      }
+      
+      loadGroupChat(groupId) {
+        this.activeGroup = groupId;
+        this.messagesContainer.innerHTML = '';
+        this.replyToMessageId = null;
+        this.hideReplyPreview();
+        
+        this.socket.emit('get-group-chat-history', { 
+          groupId: groupId 
+        });
+        
+        if (this.isMobile()) {
+          this.showChatView();
+        }
+      }
+      
+      renderGroupChatHistory(data) {
+        this.messagesContainer.innerHTML = '';
+        data.messages.forEach(m => this.addMessageToUI(m));
+        this.scrollToBottom();
+        
+        // Update active chat name
+        if (data.group) {
+          this.activeChat.textContent = `Group: ${data.group.name}`;
+        }
+      }
+      
+      toggleGroupInfo() {
+        this.groupInfoPanel.classList.toggle('active');
+        if (this.groupInfoPanel.classList.contains('active')) {
+          this.socket.emit('get-group-info', { groupId: this.activeGroup });
+        }
+      }
+      
+      handleGroupInfo(data) {
+        if (data.group) {
+          this.groupMembersList.innerHTML = '';
+          
+          data.group.members.forEach(member => {
+            const memberEl = document.createElement('div');
+            memberEl.className = 'group-member';
+            memberEl.innerHTML = `
+              <div>${member} ${member === data.group.createdBy ? '<span class="admin-badge">Admin</span>' : ''}</div>
+              ${member !== data.group.createdBy && this.currentUser.username === data.group.createdBy ? 
+                `<button class="remove-member-btn btn danger small" data-member="${member}">Remove</button>` : ''}
+            `;
+            
+            this.groupMembersList.appendChild(memberEl);
+          });
+          
+          // Add event listeners to remove buttons
+          document.querySelectorAll('.remove-member-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+              const member = e.target.getAttribute('data-member');
+              this.socket.emit('remove-group-member', {
+                groupId: this.activeGroup,
+                member: member,
+                removedBy: this.currentUser.username
+              });
+            });
+          });
+        }
+      }
+      
+      addGroupMember() {
+        const username = this.addMemberInput.value.trim();
+        if (!username) return;
+        
+        this.socket.emit('add-group-member', {
+          groupId: this.activeGroup,
+          username: username,
+          addedBy: this.currentUser.username
+        });
+        
+        this.addMemberInput.value = '';
+      }
+      
+      handleGroupMemberAdded(data) {
+        if (data.success) {
+          this.socket.emit('get-group-info', { groupId: this.activeGroup });
+        } else {
+          alert(data.message || 'Failed to add member');
+        }
+      }
+      
+      handleGroupMemberRemoved(data) {
+        if (data.success) {
+          this.socket.emit('get-group-info', { groupId: this.activeGroup });
+          
+          // If current user was removed, go back to friends view
+          if (data.removedUser === this.currentUser.username) {
+            this.showFriendsView();
+            this.socket.emit('get-groups', { username: this.currentUser.username });
+          }
+        } else {
+          alert(data.message || 'Failed to remove member');
+        }
+      }
+      
+      // Chat methods
+      startChatWithFriend(friend) {
+        this.activeFriend = friend;
+        this.activeGroup = null;
+        this.activeChat.textContent = `Chat with ${friend}`;
+        this.messageInput.disabled = false;
+        this.sendBtn.disabled = false;
+        this.groupInfoBtn.style.display = 'none';
+        this.groupInfoPanel.classList.remove('active');
+        
+        this.loadChat(friend);
+        this.showChatView();
+      }
+      
+      loadChat(friend) {
+        this.activeFriend = friend;
+        this.messagesContainer.innerHTML = '';
+        this.replyToMessageId = null;
+        this.hideReplyPreview();
+        
+        this.socket.emit('get-chat-history', { 
+          username: this.currentUser.username, 
+          withUser: friend 
+        });
+        
+        this.socket.emit('get-last-seen', { username: friend });
+        
+        if (this.isMobile()) {
+          this.showChatView();
+        }
+      }
+      
+      sendMessage() {
+        const text = this.messageInput.value.trim();
+        if (!text) return;
+        
+        if (this.activeFriend) {
+          // Private message
+          this.socket.emit('send-message', { 
+            from: this.currentUser.username, 
+            to: this.activeFriend, 
+            message: text, 
+            replyTo: this.replyToMessageId 
+          });
+        } else if (this.activeGroup) {
+          // Group message
+          this.socket.emit('send-group-message', { 
+            from: this.currentUser.username, 
+            groupId: this.activeGroup, 
+            message: text, 
+            replyTo: this.replyToMessageId 
+          });
+        }
+        
+        this.messageInput.value = '';
+        this.cancelReply();
+        this.stopTypingEmit();
+      }
+      
+      handleNewMessage(msg) {
+        if (msg.type === 'group') {
+          // Group message
+          if (this.activeGroup && msg.groupId === this.activeGroup) {
+            this.addMessageToUI(msg);
+          } else {
+            // Update groups list to show unread count
+            this.socket.emit('get-groups', { username: this.currentUser.username });
+          }
+        } else {
+          // Private message
+          if ((this.activeFriend && (msg.from === this.activeFriend || msg.to === this.activeFriend)) || 
+              msg.from === this.currentUser.username) {
+            this.addMessageToUI(msg);
+          } else {
+            this.socket.emit('get-friends', { username: this.currentUser.username });
+          }
+        }
+      }
+      
+      renderChatHistory(messages) {
+        this.messagesContainer.innerHTML = '';
+        messages.forEach(m => this.addMessageToUI(m));
+        this.scrollToBottom();
+      }
+      
+      addMessageToUI(msg) {
+        const isSent = msg.from === this.currentUser.username;
+        const isGroup = msg.type === 'group';
+        const el = document.createElement('div');
+        el.className = `message ${isSent ? 'sent' : 'received'} ${msg.deleted ? 'deleted' : ''}`;
+        
+        if (msg._id) el.setAttribute('data-id', msg._id);
+
+        const contentText = msg.deleted ? 'Message deleted' : (msg.text || '');
+
+        // Reply snippet handling
+        let replySnippet = '';
+        if (msg.replyTo) {
+          const repliedMsg = document.querySelector(`[data-id="${msg.replyTo}"]`);
+          let repliedText = repliedMsg ? repliedMsg.querySelector('.msg-content').textContent : '[original message]';
+          replySnippet = `
+            <div class="reply-snippet" style="
+              font-size:0.8rem;
+              opacity:0.8;
+              border-left:3px solid #00e6ff;
+              padding-left:6px;
+              margin-bottom:4px;
+            ">
+              ${repliedText}
+            </div>`;
+        }
+
+        // Show sender name for group messages
+        const senderInfo = isGroup && !isSent ? `<div class="small" style="margin-bottom:4px; opacity:0.8;">${msg.from}</div>` : '';
+
+        el.innerHTML = `
+          ${senderInfo}
+          ${replySnippet}
+          <div class="msg-content">${contentText}</div>
+          <div class="meta">${msg.timestamp ? new Date(msg.timestamp).toLocaleString() : ''}</div>
+          
+          ${!msg.deleted ? `
+            <div class="message-actions">
+              <button class="reply-btn" title="Reply">↩</button>
+              ${isSent ? `
+                <div class="message-menu">
+                  <button class="menu-btn">⋯</button>
+                  <div class="menu-options hidden">
+                    <button class="delete-option">Delete message</button>
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+          ` : ''}
+        `;
+        
+        this.messagesContainer.appendChild(el);
+        this.scrollToBottom();
+
+        // Add event listeners for message actions
+        if (!msg.deleted) {
+          const replyBtn = el.querySelector('.reply-btn');
+          if (replyBtn) {
+            replyBtn.addEventListener('click', () => {
+              this.startReply(msg);
+            });
+          }
+          
+          if (isSent) {
+            const menuBtn = el.querySelector('.menu-btn');
+            const menuOptions = el.querySelector('.menu-options');
+            const deleteOption = el.querySelector('.delete-option');
+            
+            menuBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              menuOptions.classList.toggle('hidden');
+            });
+            
+            deleteOption.addEventListener('click', () => {
+              if (isGroup) {
+                this.socket.emit('delete-group-message', { 
+                  messageId: msg._id, 
+                  groupId: this.activeGroup,
+                  requestor: this.currentUser.username 
+                });
+              } else {
+                this.socket.emit('delete-message', { 
+                  messageId: msg._id, 
+                  requestor: this.currentUser.username 
+                });
+              }
+              menuOptions.classList.add('hidden');
+            });
+            
+            // Close menu when clicking elsewhere
+            document.addEventListener('click', (e) => {
+              if (!el.contains(e.target)) {
+                menuOptions.classList.add('hidden');
+              }
+            });
+          }
+        }
+      }
+      
+      handleMessageDeleted(data) {
+        const { messageId } = data;
+        const el = document.querySelector(`[data-id="${messageId}"]`);
+        
+        if (el) {
+          el.classList.add('deleted');
+          const content = el.querySelector('.msg-content');
+          if (content) content.textContent = 'Message deleted';
+          
+          const meta = el.querySelector('.meta');
+          if (meta) meta.textContent = '';
+          
+          const actions = el.querySelector('.message-actions');
+          if (actions) actions.remove();
+        }
+      }
+      
+      // Reply functionality
+      startReply(msg) {
+        this.replyToMessageId = msg._id || null;
+        this.replyWho.textContent = msg.from;
+        this.replyText.textContent = msg.text || '[deleted]';
+        this.replyPreview.classList.remove('hidden');
+        
+        // Scroll to bottom to ensure input and reply preview are visible
+        if (this.isMobile()) {
+          setTimeout(() => this.scrollToBottom(), 100);
+        }
+      }
+      
+      cancelReply() {
+        this.replyToMessageId = null;
+        this.hideReplyPreview();
+      }
+      
+      hideReplyPreview() {
+        this.replyPreview.classList.add('hidden');
+        this.replyWho.textContent = '';
+        this.replyText.textContent = '';
+      }
+      
+      // Typing indicators
+      onTypingInput() {
+        if (!this.activeFriend && !this.activeGroup) return;
+        
+        if (!this.isTypingEmitted) {
+          if (this.activeFriend) {
+            this.socket.emit('typing', { 
+              from: this.currentUser.username, 
+              to: this.activeFriend 
+            });
+          } else if (this.activeGroup) {
+            this.socket.emit('group-typing', { 
+              from: this.currentUser.username, 
+              groupId: this.activeGroup 
+            });
+          }
+          this.isTypingEmitted = true;
+        }
+        
+        if (this.typingTimeout) clearTimeout(this.typingTimeout);
+        this.typingTimeout = setTimeout(() => {
+          this.stopTypingEmit();
+        }, 900);
+      }
+      
+      stopTypingEmit() {
+        if (!this.isTypingEmitted) return;
+        
+        if (this.activeFriend) {
+          this.socket.emit('stop-typing', { 
+            from: this.currentUser.username, 
+            to: this.activeFriend 
+          });
+        } else if (this.activeGroup) {
+          this.socket.emit('stop-group-typing', { 
+            from: this.currentUser.username, 
+            groupId: this.activeGroup 
+          });
+        }
+        
+        this.isTypingEmitted = false;
+      }
+      
+      showTypingIndicator(data) {
+        if (this.activeFriend && data.from === this.activeFriend) {
+          this.typingIndicator.textContent = `${data.from} is typing...`;
+        }
+      }
+      
+      showGroupTypingIndicator(data) {
+        if (this.activeGroup && data.groupId === this.activeGroup && data.from !== this.currentUser.username) {
+          this.typingIndicator.textContent = `${data.from} is typing...`;
+        }
+      }
+      
+      hideTypingIndicator(data) {
+        if (this.activeFriend && data.from === this.activeFriend) {
+          this.typingIndicator.textContent = '';
+        }
+      }
+      
+      hideGroupTypingIndicator(data) {
+        if (this.activeGroup && data.groupId === this.activeGroup && data.from !== this.currentUser.username) {
+          this.typingIndicator.textContent = '';
+        }
+      }
+      
+      // User status methods
+      handleUserOnline(data) {
+        this.socket.emit('get-friends', { username: this.currentUser.username });
+      }
+      
+      handleUserOffline(data) {
+        this.socket.emit('get-friends', { username: this.currentUser.username });
+      }
+      
+      updateLastSeen(data) {
+        if (this.activeFriend && data.username === this.activeFriend) {
+          if (data.online) {
+            this.lastSeenEl.textContent = 'Online';
+          } else if (data.lastSeen) {
+            this.lastSeenEl.textContent = `Last seen: ${new Date(data.lastSeen).toLocaleString()}`;
+          } else {
+            this.lastSeenEl.textContent = 'Last seen: unknown';
+          }
+        }
+      }
+      
+      handleNewRequest(data) {
+        if (data && data.from) {
+          this.socket.emit('get-requests', { username: this.currentUser.username });
+        }
+      }
+      
+      handleActionFailed(data) {
+        if (data && data.message) alert(data.message);
+      }
+      
+      // UI Helper methods
+      showChatView() {
+        if (this.isMobile()) {
+          document.getElementById('friends-section').style.display = 'none';
+          document.getElementById('chat-container').classList.add('active');
+          document.getElementById('back-to-friends').style.display = 'flex';
+          
+          // Force a reflow and scroll to bottom
+          setTimeout(() => {
+            this.scrollToBottom();
+            this.messageInput.focus();
+          }, 100);
+        }
+      }
+      
+      showFriendsView() {
+        if (this.isMobile()) {
+          document.getElementById('friends-section').style.display = 'block';
+          document.getElementById('chat-container').classList.remove('active');
+          document.getElementById('back-to-friends').style.display = 'none';
+          this.activeFriend = null;
+          this.activeGroup = null;
+          this.activeChat.textContent = 'Select a friend to chat';
+          this.messageInput.disabled = true;
+          this.sendBtn.disabled = true;
+          this.messagesContainer.innerHTML = '';
+          this.groupInfoBtn.style.display = 'none';
+          this.groupInfoPanel.classList.remove('active');
+        }
+      }
+      
+      scrollToBottom() {
+        this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+      }
+      
+      isMobile() {
+        return window.innerWidth <= 768 || 
+               /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      }
+      
+      // Session management
+      saveUserSession(username) { 
+        localStorage.setItem('chatUser', username); 
+      }
+      
+      getUserSession() { 
+        return localStorage.getItem('chatUser'); 
+      }
+      
+      clearUserSession() { 
+        localStorage.removeItem('chatUser'); 
+      }
+      
+      autoLogin() {
+        const saved = this.getUserSession();
+        if (saved) this.socket.emit('auto-login', { username: saved });
+      }
+    }
+
+    // Initialize the app when DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+      const app = new UltraChat();
+      
+      // Periodically update last seen
+      setInterval(() => {
+        if (app.activeFriend && app.currentUser) {
+          app.socket.emit('get-last-seen', { username: app.activeFriend });
+        }
+      }, 15000);
+      
+      // Handle window resize
+      window.addEventListener('resize', () => {
+        if (!app.isMobile() && document.getElementById('chat-container').classList.contains('active')) {
+          document.getElementById('friends-section').style.display = 'block';
+          document.getElementById('chat-container').classList.remove('active');
+          document.getElementById('back-to-friends').style.display = 'none';
+        }
+      });
+    });
+  </script>
 </body>
 </html>
